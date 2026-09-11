@@ -62,14 +62,17 @@
       margin-bottom: 4px;
       color: #4a5568;
     }
-    .form-group input {
+    .form-group input,
+    .form-group select {
       width: 100%;
       padding: 8px 10px;
       border: 1px solid #cbd5e0;
       border-radius: 6px;
       font-size: 10pt;
+      background-color: white;
     }
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group select:focus {
       outline: none;
       border-color: #c53030;
       box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
@@ -114,7 +117,18 @@
         <h2>1. Osnovni podatki</h2>
         <div class="form-group">
           <label for="pizzas">Število pic:</label>
-          <input type="number" id="pizzas" value="4" min="1" step="1" oninput="calculate()">
+          <select id="pizzas" onchange="calculate()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="weight">Teža enega hlebčka (g):</label>
