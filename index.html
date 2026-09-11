@@ -192,6 +192,43 @@
 </div>
 
 <script>
+  const inputIds = [
+    'pizzas',
+    'weight',
+    'perc_water',
+    'perc_yeast',
+    'perc_salt',
+    'perc_sugar',
+    'perc_oil'
+  ];
+
+  function loadSavedValues() {
+    try {
+      const savedValues = JSON.parse(localStorage.getItem('pizzaCalculatorValues'));
+      if (!savedValues) return;
+
+      inputIds.forEach((id) => {
+        if (savedValues[id] !== undefined) {
+          document.getElementById(id).value = savedValues[id];
+        }
+      });
+    } catch (error) {
+      // Če shranjeni podatki niso berljivi, se uporabijo privzete vrednosti.
+    }
+  }
+
+  function saveValues() {
+    try {
+      const values = {};
+      inputIds.forEach((id) => {
+        values[id] = document.getElementById(id).value;
+      });
+      localStorage.setItem('pizzaCalculatorValues', JSON.stringify(values));
+    } catch (error) {
+      // Kalkulator deluje tudi, če brskalnik ne dovoli lokalnega shranjevanja.
+    }
+  }
+
   function calculate() {
     // Branje vnosnih polj
     const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
@@ -251,9 +288,11 @@
     `;
 
     document.getElementById('results').innerHTML = html;
+    saveValues();
   }
 
-  // Začetni izračun
+  // Ob odprtju obnovi zadnje uporabljene vrednosti in izvede izračun.
+  loadSavedValues();
   calculate();
 </script>
 
