@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kalkulator sestavin za čevapčiče">
+  <title>Kalkulator za čevapčiče</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #fdfbf7;
+      color: #2d3748;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      color: #9b2c2c;
+      font-size: 15px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link:focus-visible {
+      border-radius: 4px;
+      outline: 3px solid rgba(197, 48, 48, 0.18);
+      outline-offset: 3px;
+    }
+    .header {
+      margin-bottom: 20px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #c53030, #9b2c2c);
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .header h1 { margin: 0 0 5px; font-size: 30px; }
+    .header p { margin: 0; opacity: 0.9; font-size: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .card + .card { margin-top: 20px; }
+    .card h2 {
+      margin-top: 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #feb2b2;
+      color: #9b2c2c;
+      font-size: 20px;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label {
+      display: block;
+      margin-bottom: 4px;
+      color: #4a5568;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      background-color: white;
+      font-size: 16px;
+    }
+    .form-group input:focus {
+      border-color: #c53030;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+    }
+    #meat {
+      border-color: #d69e2e;
+      background: #fff8b5;
+      font-weight: bold;
+    }
+    .hint {
+      margin: -5px 0 16px;
+      color: #718096;
+      font-size: 15px;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 16px;
+    }
+    th {
+      background-color: #fff5f5;
+      color: #9b2c2c;
+      text-align: left;
+    }
+    .num { text-align: right; }
+    #results td:last-child { font-weight: bold; }
+    .total-row td {
+      border-top: 2px solid #feb2b2;
+      background-color: #fff5f5;
+      color: #c53030;
+      font-weight: bold;
+    }
+    @media (max-width: 480px) {
+      body { padding: 14px; }
+      .header { padding: 18px; }
+      .header h1 { font-size: 26px; }
+      .card { padding: 16px; }
+      th, td { padding: 9px 6px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <a class="back-link" href="index.html">← Nazaj na izbiro receptov</a>
+
+    <header class="header">
+      <h1>🥩 Kalkulator za čevapčiče</h1>
+      <p>Izračun začimb in dodatkov glede na količino mesa</p>
+    </header>
+
+    <div class="grid">
+      <div>
+        <section class="card">
+          <h2>1. Količina mesa</h2>
+          <div class="form-group">
+            <label for="meat">Meso (g):</label>
+            <input type="number" id="meat" value="1000" min="0" step="100" inputmode="decimal">
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>2. Odstotki dodatkov</h2>
+          <p class="hint">Meso vedno predstavlja 100 %. Vrednosti lahko poljubno spremeniš.</p>
+
+          <div class="form-group">
+            <label for="perc_salt">Sol (%):</label>
+            <input type="number" id="perc_salt" value="1.400" min="0" step="0.1" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_water">Voda (%):</label>
+            <input type="number" id="perc_water" value="4.000" min="0" step="0.1" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_pepper">Poper (%):</label>
+            <input type="number" id="perc_pepper" value="0.080" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_garlic">Česen (%):</label>
+            <input type="number" id="perc_garlic" value="0.100" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_paprika">Suha paprika (%):</label>
+            <input type="number" id="perc_paprika" value="0.100" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_e500">E500 – soda bikarbona (%):</label>
+            <input type="number" id="perc_e500" value="0.130" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_e331">E331 – natrijev citrat (%):</label>
+            <input type="number" id="perc_e331" value="0.200" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_sugar">Sladkor v prahu (%):</label>
+            <input type="number" id="perc_sugar" value="0.150" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_nutmeg">Muškatni orešček, riban (%):</label>
+            <input type="number" id="perc_nutmeg" value="0.000" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label for="perc_cumin">Kumin – rimska kumina (%):</label>
+            <input type="number" id="perc_cumin" value="0.000" min="0" step="0.01" inputmode="decimal">
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="card">
+          <h2>3. Izračunane količine</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Sestavina</th>
+                <th class="num">%</th>
+                <th class="num">Količina</th>
+              </tr>
+            </thead>
+            <tbody id="results"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ingredients = [
+      { name: 'Sol', id: 'perc_salt' },
+      { name: 'Voda', id: 'perc_water' },
+      { name: 'Poper', id: 'perc_pepper' },
+      { name: 'Česen', id: 'perc_garlic' },
+      { name: 'Suha paprika', id: 'perc_paprika' },
+      { name: 'E500 – soda bikarbona', id: 'perc_e500' },
+      { name: 'E331 – natrijev citrat', id: 'perc_e331' },
+      { name: 'Sladkor v prahu', id: 'perc_sugar' },
+      { name: 'Muškatni orešček, riban', id: 'perc_nutmeg' },
+      { name: 'Kumin – rimska kumina', id: 'perc_cumin' }
+    ];
+
+    const inputIds = ['meat', ...ingredients.map((ingredient) => ingredient.id)];
+
+    function numberValue(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function formatNumber(value, decimals) {
+      return value.toLocaleString('sl-SI', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function loadSavedValues() {
+      try {
+        const savedValues = JSON.parse(localStorage.getItem('cevapciciCalculatorValues'));
+        if (!savedValues) return;
+
+        inputIds.forEach((id) => {
+          if (savedValues[id] !== undefined) {
+            document.getElementById(id).value = savedValues[id];
+          }
+        });
+      } catch (error) {
+        // Če shranjeni podatki niso berljivi, se uporabijo privzete vrednosti.
+      }
+    }
+
+    function saveValues() {
+      try {
+        const values = {};
+        inputIds.forEach((id) => {
+          values[id] = document.getElementById(id).value;
+        });
+        localStorage.setItem('cevapciciCalculatorValues', JSON.stringify(values));
+      } catch (error) {
+        // Kalkulator deluje tudi, če brskalnik ne dovoli lokalnega shranjevanja.
+      }
+    }
+
+    function calculate() {
+      const meatGrams = numberValue('meat');
+      let additivesGrams = 0;
+
+      const rows = ingredients.map((ingredient) => {
+        const percentage = numberValue(ingredient.id);
+        const grams = meatGrams * percentage / 100;
+        additivesGrams += grams;
+
+        return `
+          <tr>
+            <td>${ingredient.name}</td>
+            <td class="num">${formatNumber(percentage, 3)} %</td>
+            <td class="num">${formatNumber(grams, 1)} g</td>
+          </tr>`;
+      }).join('');
+
+      const totalWeight = meatGrams + additivesGrams;
+      document.getElementById('results').innerHTML = `
+        <tr>
+          <td>Meso</td>
+          <td class="num">100,000 %</td>
+          <td class="num">${formatNumber(meatGrams, 1)} g</td>
+        </tr>
+        ${rows}
+        <tr class="total-row">
+          <td>Skupaj</td>
+          <td class="num"></td>
+          <td class="num">${formatNumber(totalWeight, 1)} g</td>
+        </tr>`;
+
+      saveValues();
+    }
+
+    inputIds.forEach((id) => {
+      document.getElementById(id).addEventListener('input', calculate);
+    });
+
+    loadSavedValues();
+    calculate();
+  </script>
+</body>
+</html>
