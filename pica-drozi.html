@@ -126,7 +126,11 @@
       color: #c53030;
       border-top: 2px solid #feb2b2;
     }
-    .full-width { margin-top: 20px; }
+
+    .full-width {
+      margin-top: 20px;
+      width: calc((100% - 20px) / 2);
+    }
     .flour-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 120px;
@@ -142,6 +146,10 @@
     .flour-summary.ok { color: #2f855a; }
     .flour-summary.error { color: #c53030; }
     .hint { color: #718096; margin-top: -4px; }
+
+    @media (max-width: 767px) {
+      .full-width { width: 100%; }
+    }
   </style>
 </head>
 <body>
