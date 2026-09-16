@@ -94,6 +94,13 @@
       border-color: #c53030;
       box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
     }
+    .flour-name:disabled,
+    .flour-percent:disabled {
+      background-color: #edf2f7;
+      color: #a0aec0;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
 
     table {
       width: 100%;
@@ -228,7 +235,7 @@
 
   <div class="card full-width">
     <h2>4. Razdelitev moke</h2>
-    <p class="hint">Skupno količino moke razdeli med različne vrste. Vsota deležev mora biti 100%.</p>
+    <p class="hint">Vsaka naslednja moka lahko zavzame največ še preostali delež do 100%.</p>
 
     <div class="flour-grid">
       <input class="flour-name" id="flour_name_1" type="text" value="Moka 1" oninput="calculateFlours()" aria-label="Ime moke 1">
@@ -344,8 +351,30 @@
     let html = '';
 
     for (let i = 1; i <= 4; i++) {
-      const name = document.getElementById(`flour_name_${i}`).value.trim() || `Moka ${i}`;
-      const percent = parseFloat(document.getElementById(`flour_percent_${i}`).value) || 0;
+      const nameInput = document.getElementById(`flour_name_${i}`);
+      const percentInput = document.getElementById(`flour_percent_${i}`);
+      const remainingBefore = Math.max(0, 100 - totalPercent);
+
+      if (i === 1) {
+        nameInput.disabled = false;
+        percentInput.disabled = false;
+      } else {
+        const enabled = remainingBefore > 0.0001;
+        nameInput.disabled = !enabled;
+        percentInput.disabled = !enabled;
+        if (!enabled) percentInput.value = '0';
+      }
+
+      percentInput.max = remainingBefore.toFixed(1);
+
+      let percent = parseFloat(percentInput.value) || 0;
+      if (percent < 0) percent = 0;
+      if (percent > remainingBefore) {
+        percent = remainingBefore;
+        percentInput.value = Number(percent.toFixed(1)).toString();
+      }
+
+      const name = nameInput.value.trim() || `Moka ${i}`;
       const grams = currentFlourGrams * percent / 100;
       totalPercent += percent;
 
@@ -369,7 +398,7 @@
       summary.textContent = `Vsota deležev je 100 %. Skupaj: ${currentFlourGrams.toFixed(1)} g moke.`;
       summary.className = 'flour-summary ok';
     } else {
-      summary.textContent = `Pozor: vsota deležev je ${totalPercent.toFixed(1)} %. Nastavi jo na 100 %.`;
+      summary.textContent = `Preostane še ${(100 - totalPercent).toFixed(1)} % moke.`;
       summary.className = 'flour-summary error';
     }
 
