@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator testa za pice - Pica klasika</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #fdfbf7;
+      color: #2d3748;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px;
+      color: #9b2c2c; font-size: 15px; font-weight: bold; text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link:focus-visible { outline: 3px solid rgba(197, 48, 48, 0.18); outline-offset: 3px; border-radius: 4px; }
+    .header {
+      background: linear-gradient(135deg, #c53030, #9b2c2c); color: white;
+      padding: 20px 24px; border-radius: 12px; margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .header h1 { margin: 0 0 5px 0; font-size: 30px; }
+    .header p { margin: 0; opacity: 0.9; font-size: 16px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card h2 { margin-top: 0; font-size: 20px; color: #9b2c2c; border-bottom: 2px solid #feb2b2; padding-bottom: 8px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 16px; font-weight: bold; margin-bottom: 4px; color: #4a5568; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 8px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+      font-size: 16px; background-color: white;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #c53030; box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; font-size: 16px; border-bottom: 1px solid #edf2f7; }
+    th { background-color: #fff5f5; color: #9b2c2c; text-align: left; }
+    .num { text-align: right; }
+    #results td:last-child { font-weight: bold; }
+    .total-row td { font-weight: bold; background-color: #fff5f5; color: #c53030; border-top: 2px solid #feb2b2; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back-link" href="pica.html">← Nazaj na izbiro pice</a>
+  <div class="header">
+    <h1>🍕 Pica klasika</h1>
+    <p>Prilagodite željene parametre in pekovske odstotke</p>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="card" style="margin-bottom: 20px;">
+        <h2>1. Osnovni podatki</h2>
+        <div class="form-group">
+          <label for="pizzas">Število pic:</label>
+          <select id="pizzas" onchange="calculate()">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="weight">Teža enega hlebčka (g):</label>
+          <input type="number" id="weight" value="250" step="5" min="50" oninput="calculate()">
+        </div>
+      </div>
+      <div class="card">
+        <h2>2. Nastavitev Pekovskih %</h2>
+        <p style="font-size: 16px; color: #718096; margin-top: -5px;">Moka vedno predstavlja 100%.</p>
+        <div class="form-group">
+          <label for="recipe">Izberi recept:</label>
+          <select id="recipe" onchange="applyRecipe()">
+            <option value="classic" selected>Klasični</option>
+            <option value="matej">Matej</option>
+            <option value="marko">Marko</option>
+            <option value="bostjan">Boštjan</option>
+            <option value="manual">Ročna nastavitev</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="perc_water">Voda (Hidracija %):</label><input type="number" id="perc_water" value="64.0" step="0.5" oninput="setManualRecipe(); calculate()"></div>
+        <div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input type="number" id="perc_yeast" value="1.0" step="0.1" oninput="setManualRecipe(); calculate()"></div>
+        <div class="form-group"><label for="perc_salt">Sol (%):</label><input type="number" id="perc_salt" value="2.2" step="0.1" oninput="setManualRecipe(); calculate()"></div>
+        <div class="form-group"><label for="perc_sugar">Sladkor (%):</label><input type="number" id="perc_sugar" value="1.8" step="0.1" oninput="setManualRecipe(); calculate()"></div>
+        <div class="form-group"><label for="perc_oil">Olje (%):</label><input type="number" id="perc_oil" value="2.0" step="0.1" oninput="setManualRecipe(); calculate()"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>3. Izračunane količine</h2>
+        <table>
+          <thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead>
+          <tbody id="results"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const recipes = {
+    classic: { water: 64, yeast: 1, salt: 2.2, sugar: 1.8, oil: 2 },
+    matej: { water: 64, yeast: 0.6, salt: 2.2, sugar: 1.8, oil: 2 },
+    marko: { water: 60, yeast: 1, salt: 2.2, sugar: 1.8, oil: 2 },
+    bostjan: { water: 63.4, yeast: 0.142, salt: 3.0, sugar: 0, oil: 0 }
+  };
+  const inputIds = ['pizzas','weight','recipe','perc_water','perc_yeast','perc_salt','perc_sugar','perc_oil'];
+  function loadSavedValues() {
+    try {
+      const savedValues = JSON.parse(localStorage.getItem('pizzaCalculatorValues'));
+      if (!savedValues) return;
+      inputIds.forEach((id) => { if (savedValues[id] !== undefined) document.getElementById(id).value = savedValues[id]; });
+    } catch (error) {}
+  }
+  function saveValues() {
+    try {
+      const values = {};
+      inputIds.forEach((id) => { values[id] = document.getElementById(id).value; });
+      localStorage.setItem('pizzaCalculatorValues', JSON.stringify(values));
+    } catch (error) {}
+  }
+  function applyRecipe() {
+    const selectedRecipe = document.getElementById('recipe').value;
+    const recipe = recipes[selectedRecipe];
+    if (recipe) {
+      document.getElementById('perc_water').value = recipe.water;
+      document.getElementById('perc_yeast').value = recipe.yeast;
+      document.getElementById('perc_salt').value = recipe.salt;
+      document.getElementById('perc_sugar').value = recipe.sugar;
+      document.getElementById('perc_oil').value = recipe.oil;
+    }
+    calculate();
+  }
+  function setManualRecipe() { document.getElementById('recipe').value = 'manual'; }
+  function calculate() {
+    const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
+    const pizzaWeight = parseFloat(document.getElementById('weight').value) || 0;
+    const percWater = parseFloat(document.getElementById('perc_water').value) || 0;
+    const percYeast = parseFloat(document.getElementById('perc_yeast').value) || 0;
+    const percSalt = parseFloat(document.getElementById('perc_salt').value) || 0;
+    const percSugar = parseFloat(document.getElementById('perc_sugar').value) || 0;
+    const percOil = parseFloat(document.getElementById('perc_oil').value) || 0;
+    const targetTotalWeight = numPizzas * pizzaWeight;
+    const totalPercentage = 100 + percWater + percYeast + percSalt + percSugar + percOil;
+    const flourGrams = targetTotalWeight / (totalPercentage / 100);
+    const calcGrams = (perc) => (flourGrams * (perc / 100)).toFixed(1);
+    document.getElementById('results').innerHTML = `
+      <tr><td>Moka</td><td class="num">100.0 %</td><td class="num">${flourGrams.toFixed(1)} g</td></tr>
+      <tr><td>Voda</td><td class="num">${percWater.toFixed(1)} %</td><td class="num">${calcGrams(percWater)} g</td></tr>
+      <tr><td>Suhi kvas</td><td class="num">${percYeast.toFixed(1)} %</td><td class="num">${calcGrams(percYeast)} g</td></tr>
+      <tr><td>Sol</td><td class="num">${percSalt.toFixed(1)} %</td><td class="num">${calcGrams(percSalt)} g</td></tr>
+      <tr><td>Sladkor</td><td class="num">${percSugar.toFixed(1)} %</td><td class="num">${calcGrams(percSugar)} g</td></tr>
+      <tr><td>Olje</td><td class="num">${percOil.toFixed(1)} %</td><td class="num">${calcGrams(percOil)} g</td></tr>
+      <tr class="total-row"><td>Skupaj (${numPizzas} pic)</td><td class="num"></td><td class="num">${targetTotalWeight.toFixed(0)} g</td></tr>`;
+    saveValues();
+  }
+  loadSavedValues();
+  calculate();
+</script>
+</body>
+</html>
