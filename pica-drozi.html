@@ -168,6 +168,8 @@
     .flour-summary.error { color: #c53030; }
     .hint { color: #718096; margin-top: -4px; }
 
+    .print-summary { display: none; }
+
     @media (max-width: 767px) {
       .full-width { width: 100%; }
       .print-actions { justify-content: stretch; }
@@ -175,154 +177,257 @@
     }
 
     @media print {
-      @page { margin: 12mm; }
-      body {
-        padding: 0;
-        background: white;
-        color: #000;
+      @page {
+        size: A4 portrait;
+        margin: 10mm 12mm;
       }
-      .container { max-width: none; }
-      .back-link,
-      .print-actions { display: none !important; }
-      .header,
-      .card { box-shadow: none; }
-      .header { margin-bottom: 16px; }
-      .card { break-inside: avoid; }
-      .full-width { width: calc((100% - 20px) / 2); }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        color: #111;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .screen-content { display: none !important; }
+      .print-summary {
+        display: block !important;
+        width: 100%;
+        max-width: 186mm;
+        margin: 0;
+        font-size: 9.5pt;
+        line-height: 1.15;
+      }
+
+      .print-summary h1 {
+        margin: 0 0 2.5mm;
+        font-size: 17pt;
+        font-weight: 700;
+      }
+
+      .print-meta {
+        display: flex;
+        gap: 7mm;
+        flex-wrap: wrap;
+        margin-bottom: 3mm;
+        font-size: 9.5pt;
+      }
+      .print-meta strong { font-weight: 700; }
+
+      .print-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+        align-items: start;
+      }
+
+      .print-section h2 {
+        margin: 0 0 1.5mm;
+        padding-bottom: 1mm;
+        border-bottom: 0.3mm solid #444;
+        font-size: 10.5pt;
+        font-weight: 700;
+      }
+
+      .print-summary table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+      }
+      .print-summary th,
+      .print-summary td {
+        padding: 0.8mm 0;
+        border: 0;
+        border-bottom: 0.15mm solid #ddd;
+        background: transparent;
+        color: #111;
+        font-size: 9pt;
+      }
+      .print-summary th {
+        font-weight: 700;
+        text-align: left;
+      }
+      .print-summary td:nth-child(2),
+      .print-summary td:nth-child(3),
+      .print-summary th:nth-child(2),
+      .print-summary th:nth-child(3) {
+        text-align: right;
+      }
+      .print-summary .print-total td {
+        padding-top: 1.2mm;
+        border-top: 0.3mm solid #444;
+        border-bottom: 0;
+        font-weight: 700;
+      }
+      .print-note {
+        margin: 2.5mm 0 0;
+        padding-top: 1.5mm;
+        border-top: 0.2mm solid #bbb;
+        font-size: 8.5pt;
+      }
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <a class="back-link" href="pica.html">← Nazaj na izbiro pice</a>
+<div class="screen-content">
+  <div class="container">
+    <a class="back-link" href="pica.html">← Nazaj na izbiro pice</a>
 
-  <div class="header">
-    <h1>🍕 Pica droži</h1>
-    <p>Prilagodite željene parametre, pekovske odstotke in razmerje različnih mok</p>
-  </div>
+    <div class="header">
+      <h1>🍕 Pica droži</h1>
+      <p>Prilagodite željene parametre, pekovske odstotke in razmerje različnih mok</p>
+    </div>
 
-  <div class="print-actions">
-    <button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button>
-  </div>
+    <div class="print-actions">
+      <button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button>
+    </div>
 
-  <div class="grid">
-    <div>
-      <div class="card" style="margin-bottom: 20px;">
-        <h2>1. Osnovni podatki</h2>
-        <div class="form-group">
-          <label for="pizzas">Število pic:</label>
-          <select id="pizzas" onchange="calculate()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4" selected>4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-          </select>
+    <div class="grid">
+      <div>
+        <div class="card" style="margin-bottom: 20px;">
+          <h2>1. Osnovni podatki</h2>
+          <div class="form-group">
+            <label for="pizzas">Število pic:</label>
+            <select id="pizzas" onchange="calculate()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="weight">Teža enega hlebčka (g):</label>
+            <input type="number" id="weight" value="250" step="5" min="50" oninput="calculate()">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="weight">Teža enega hlebčka (g):</label>
-          <input type="number" id="weight" value="250" step="5" min="50" oninput="calculate()">
+
+        <div class="card">
+          <h2>2. Nastavitev Pekovskih %</h2>
+          <p class="hint">Moka vedno predstavlja 100%.</p>
+
+          <div class="form-group">
+            <label for="recipe">Izberi recept:</label>
+            <select id="recipe" onchange="applyRecipe()">
+              <option value="classic" selected>Klasični</option>
+              <option value="matej">Matej</option>
+              <option value="marko">Marko</option>
+              <option value="bostjan">Boštjan</option>
+              <option value="manual">Ročna nastavitev</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="perc_water">Voda (Hidracija %):</label>
+            <input type="number" id="perc_water" value="64.0" step="0.5" oninput="setManualRecipe(); calculate()">
+          </div>
+          <div class="form-group">
+            <label for="perc_yeast">Suhi kvas (%):</label>
+            <input type="number" id="perc_yeast" value="1.0" step="0.1" oninput="setManualRecipe(); calculate()">
+          </div>
+          <div class="form-group">
+            <label for="perc_sourdough">Droži (%):</label>
+            <input type="number" id="perc_sourdough" value="0.0" step="0.1" min="0" oninput="setManualRecipe(); calculate()">
+          </div>
+          <div class="form-group">
+            <label for="perc_salt">Sol (%):</label>
+            <input type="number" id="perc_salt" value="2.2" step="0.1" oninput="setManualRecipe(); calculate()">
+          </div>
+          <div class="form-group">
+            <label for="perc_sugar">Sladkor (%):</label>
+            <input type="number" id="perc_sugar" value="1.8" step="0.1" oninput="setManualRecipe(); calculate()">
+          </div>
+          <div class="form-group">
+            <label for="perc_oil">Olje (%):</label>
+            <input type="number" id="perc_oil" value="2.0" step="0.1" oninput="setManualRecipe(); calculate()">
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2>2. Nastavitev Pekovskih %</h2>
-        <p class="hint">Moka vedno predstavlja 100%.</p>
-
-        <div class="form-group">
-          <label for="recipe">Izberi recept:</label>
-          <select id="recipe" onchange="applyRecipe()">
-            <option value="classic" selected>Klasični</option>
-            <option value="matej">Matej</option>
-            <option value="marko">Marko</option>
-            <option value="bostjan">Boštjan</option>
-            <option value="manual">Ročna nastavitev</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="perc_water">Voda (Hidracija %):</label>
-          <input type="number" id="perc_water" value="64.0" step="0.5" oninput="setManualRecipe(); calculate()">
-        </div>
-        <div class="form-group">
-          <label for="perc_yeast">Suhi kvas (%):</label>
-          <input type="number" id="perc_yeast" value="1.0" step="0.1" oninput="setManualRecipe(); calculate()">
-        </div>
-        <div class="form-group">
-          <label for="perc_sourdough">Droži (%):</label>
-          <input type="number" id="perc_sourdough" value="0.0" step="0.1" min="0" oninput="setManualRecipe(); calculate()">
-        </div>
-        <div class="form-group">
-          <label for="perc_salt">Sol (%):</label>
-          <input type="number" id="perc_salt" value="2.2" step="0.1" oninput="setManualRecipe(); calculate()">
-        </div>
-        <div class="form-group">
-          <label for="perc_sugar">Sladkor (%):</label>
-          <input type="number" id="perc_sugar" value="1.8" step="0.1" oninput="setManualRecipe(); calculate()">
-        </div>
-        <div class="form-group">
-          <label for="perc_oil">Olje (%):</label>
-          <input type="number" id="perc_oil" value="2.0" step="0.1" oninput="setManualRecipe(); calculate()">
+      <div>
+        <div class="card">
+          <h2>3. Izračunane količine</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Sestavina</th>
+                <th class="num">%</th>
+                <th class="num">Količina</th>
+              </tr>
+            </thead>
+            <tbody id="results"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div>
-      <div class="card">
-        <h2>3. Izračunane količine</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Sestavina</th>
-              <th class="num">%</th>
-              <th class="num">Količina</th>
-            </tr>
-          </thead>
-          <tbody id="results"></tbody>
-        </table>
+    <div class="card full-width">
+      <h2>4. Razdelitev moke</h2>
+      <p class="hint">Vsaka naslednja moka lahko zavzame največ še preostali delež do 100%.</p>
+
+      <div class="flour-grid">
+        <input class="flour-name" id="flour_name_1" type="text" value="Moka 1" oninput="calculateFlours()" aria-label="Ime moke 1">
+        <input class="flour-percent" id="flour_percent_1" type="number" value="100" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 1 v odstotkih">
       </div>
-    </div>
-  </div>
+      <div class="flour-grid">
+        <input class="flour-name" id="flour_name_2" type="text" value="Moka 2" oninput="calculateFlours()" aria-label="Ime moke 2">
+        <input class="flour-percent" id="flour_percent_2" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 2 v odstotkih">
+      </div>
+      <div class="flour-grid">
+        <input class="flour-name" id="flour_name_3" type="text" value="Moka 3" oninput="calculateFlours()" aria-label="Ime moke 3">
+        <input class="flour-percent" id="flour_percent_3" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 3 v odstotkih">
+      </div>
+      <div class="flour-grid">
+        <input class="flour-name" id="flour_name_4" type="text" value="Moka 4" oninput="calculateFlours()" aria-label="Ime moke 4">
+        <input class="flour-percent" id="flour_percent_4" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 4 v odstotkih">
+      </div>
 
-  <div class="card full-width">
-    <h2>4. Razdelitev moke</h2>
-    <p class="hint">Vsaka naslednja moka lahko zavzame največ še preostali delež do 100%.</p>
-
-    <div class="flour-grid">
-      <input class="flour-name" id="flour_name_1" type="text" value="Moka 1" oninput="calculateFlours()" aria-label="Ime moke 1">
-      <input class="flour-percent" id="flour_percent_1" type="number" value="100" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 1 v odstotkih">
+      <table>
+        <thead>
+          <tr>
+            <th>Vrsta moke</th>
+            <th class="num">%</th>
+            <th class="num">Količina</th>
+          </tr>
+        </thead>
+        <tbody id="flour-results"></tbody>
+      </table>
+      <p id="flour-summary" class="flour-summary"></p>
     </div>
-    <div class="flour-grid">
-      <input class="flour-name" id="flour_name_2" type="text" value="Moka 2" oninput="calculateFlours()" aria-label="Ime moke 2">
-      <input class="flour-percent" id="flour_percent_2" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 2 v odstotkih">
-    </div>
-    <div class="flour-grid">
-      <input class="flour-name" id="flour_name_3" type="text" value="Moka 3" oninput="calculateFlours()" aria-label="Ime moke 3">
-      <input class="flour-percent" id="flour_percent_3" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 3 v odstotkih">
-    </div>
-    <div class="flour-grid">
-      <input class="flour-name" id="flour_name_4" type="text" value="Moka 4" oninput="calculateFlours()" aria-label="Ime moke 4">
-      <input class="flour-percent" id="flour_percent_4" type="number" value="0" min="0" max="100" step="0.1" oninput="calculateFlours()" aria-label="Delež moke 4 v odstotkih">
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Vrsta moke</th>
-          <th class="num">%</th>
-          <th class="num">Količina</th>
-        </tr>
-      </thead>
-      <tbody id="flour-results"></tbody>
-    </table>
-    <p id="flour-summary" class="flour-summary"></p>
   </div>
 </div>
+
+<section id="print-summary" class="print-summary" aria-hidden="true">
+  <h1>Pica droži</h1>
+  <div class="print-meta" id="print-meta"></div>
+  <div class="print-columns">
+    <div class="print-section">
+      <h2>Sestavine</h2>
+      <table>
+        <thead>
+          <tr><th>Sestavina</th><th>%</th><th>g</th></tr>
+        </thead>
+        <tbody id="print-ingredients"></tbody>
+      </table>
+    </div>
+    <div class="print-section">
+      <h2>Razdelitev moke</h2>
+      <table>
+        <thead>
+          <tr><th>Moka</th><th>%</th><th>g</th></tr>
+        </thead>
+        <tbody id="print-flours"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="print-note" id="print-note"></div>
+</section>
 
 <script>
   const recipes = {
@@ -376,7 +481,7 @@
     document.getElementById('recipe').value = 'manual';
   }
 
-  function calculate() {
+  function getRecipeData() {
     const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
     const pizzaWeight = parseFloat(document.getElementById('weight').value) || 0;
     const percWater = parseFloat(document.getElementById('perc_water').value) || 0;
@@ -385,21 +490,35 @@
     const percSalt = parseFloat(document.getElementById('perc_salt').value) || 0;
     const percSugar = parseFloat(document.getElementById('perc_sugar').value) || 0;
     const percOil = parseFloat(document.getElementById('perc_oil').value) || 0;
-
     const targetTotalWeight = numPizzas * pizzaWeight;
     const totalPercentage = 100 + percWater + percYeast + percSourdough + percSalt + percSugar + percOil;
-    currentFlourGrams = targetTotalWeight / (totalPercentage / 100);
-    const calcGrams = (perc) => (currentFlourGrams * (perc / 100)).toFixed(1);
+    const flourGrams = targetTotalWeight / (totalPercentage / 100);
 
-    document.getElementById('results').innerHTML = `
-      <tr><td>Moka</td><td class="num">100.0 %</td><td class="num">${currentFlourGrams.toFixed(1)} g</td></tr>
-      <tr><td>Voda</td><td class="num">${percWater.toFixed(1)} %</td><td class="num">${calcGrams(percWater)} g</td></tr>
-      <tr><td>Suhi kvas</td><td class="num">${percYeast.toFixed(1)} %</td><td class="num">${calcGrams(percYeast)} g</td></tr>
-      <tr><td>Droži</td><td class="num">${percSourdough.toFixed(1)} %</td><td class="num">${calcGrams(percSourdough)} g</td></tr>
-      <tr><td>Sol</td><td class="num">${percSalt.toFixed(1)} %</td><td class="num">${calcGrams(percSalt)} g</td></tr>
-      <tr><td>Sladkor</td><td class="num">${percSugar.toFixed(1)} %</td><td class="num">${calcGrams(percSugar)} g</td></tr>
-      <tr><td>Olje</td><td class="num">${percOil.toFixed(1)} %</td><td class="num">${calcGrams(percOil)} g</td></tr>
-      <tr class="total-row"><td>Skupaj (${numPizzas} pic)</td><td class="num"></td><td class="num">${targetTotalWeight.toFixed(0)} g</td></tr>
+    return {
+      numPizzas,
+      pizzaWeight,
+      targetTotalWeight,
+      flourGrams,
+      ingredients: [
+        ['Moka', 100, flourGrams],
+        ['Voda', percWater, flourGrams * percWater / 100],
+        ['Suhi kvas', percYeast, flourGrams * percYeast / 100],
+        ['Droži', percSourdough, flourGrams * percSourdough / 100],
+        ['Sol', percSalt, flourGrams * percSalt / 100],
+        ['Sladkor', percSugar, flourGrams * percSugar / 100],
+        ['Olje', percOil, flourGrams * percOil / 100]
+      ]
+    };
+  }
+
+  function calculate() {
+    const data = getRecipeData();
+    currentFlourGrams = data.flourGrams;
+
+    document.getElementById('results').innerHTML = data.ingredients.map(([name, percent, grams]) => `
+      <tr><td>${name}</td><td class="num">${percent.toFixed(1)} %</td><td class="num">${grams.toFixed(1)} g</td></tr>
+    `).join('') + `
+      <tr class="total-row"><td>Skupaj (${data.numPizzas} pic)</td><td class="num"></td><td class="num">${data.targetTotalWeight.toFixed(0)} g</td></tr>
     `;
 
     calculateFlours();
@@ -464,8 +583,67 @@
     saveValues();
   }
 
-  function saveAsPdf() {
+  function preparePrintSummary() {
     calculate();
+    const data = getRecipeData();
+    const recipeSelect = document.getElementById('recipe');
+    const recipeName = recipeSelect.options[recipeSelect.selectedIndex].text;
+
+    document.getElementById('print-meta').innerHTML = `
+      <span><strong>${data.numPizzas}</strong> pic</span>
+      <span><strong>${data.pizzaWeight.toFixed(0)} g</strong> / hlebček</span>
+      <span>Skupaj <strong>${data.targetTotalWeight.toFixed(0)} g</strong></span>
+      <span>Recept: <strong>${escapeHtml(recipeName)}</strong></span>
+    `;
+
+    document.getElementById('print-ingredients').innerHTML = data.ingredients.map(([name, percent, grams]) => `
+      <tr>
+        <td>${name}</td>
+        <td>${percent.toFixed(1)} %</td>
+        <td>${grams.toFixed(1)}</td>
+      </tr>
+    `).join('') + `
+      <tr class="print-total">
+        <td>Skupaj</td><td></td><td>${data.targetTotalWeight.toFixed(0)}</td>
+      </tr>
+    `;
+
+    let flourRows = '';
+    let flourTotal = 0;
+    for (let i = 1; i <= 4; i++) {
+      const name = document.getElementById(`flour_name_${i}`).value.trim() || `Moka ${i}`;
+      const percent = parseFloat(document.getElementById(`flour_percent_${i}`).value) || 0;
+      if (percent <= 0) continue;
+      const grams = data.flourGrams * percent / 100;
+      flourTotal += percent;
+      flourRows += `
+        <tr>
+          <td>${escapeHtml(name)}</td>
+          <td>${percent.toFixed(1)} %</td>
+          <td>${grams.toFixed(1)}</td>
+        </tr>
+      `;
+    }
+
+    if (!flourRows) {
+      flourRows = `<tr><td>Moka</td><td>100.0 %</td><td>${data.flourGrams.toFixed(1)}</td></tr>`;
+      flourTotal = 100;
+    }
+
+    document.getElementById('print-flours').innerHTML = flourRows + `
+      <tr class="print-total">
+        <td>Skupaj moka</td><td>${flourTotal.toFixed(1)} %</td><td>${(data.flourGrams * flourTotal / 100).toFixed(1)}</td>
+      </tr>
+    `;
+
+    document.getElementById('print-note').textContent =
+      Math.abs(flourTotal - 100) < 0.001
+        ? `Skupna moka: ${data.flourGrams.toFixed(1)} g.`
+        : `Pozor: razdelitev moke je ${flourTotal.toFixed(1)} %.`;
+  }
+
+  function saveAsPdf() {
+    preparePrintSummary();
     window.print();
   }
 
@@ -475,6 +653,7 @@
     return div.innerHTML;
   }
 
+  window.addEventListener('beforeprint', preparePrintSummary);
   loadSavedValues();
   calculate();
 </script>
