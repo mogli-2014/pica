@@ -37,11 +37,32 @@
       color: white;
       padding: 20px 24px;
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .header h1 { margin: 0 0 5px 0; font-size: 30px; }
     .header p { margin: 0; opacity: 0.9; font-size: 16px; }
+
+    .print-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .print-button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      background: #9b2c2c;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .print-button:hover { background: #822727; }
+    .print-button:focus-visible {
+      outline: 3px solid rgba(197, 48, 48, 0.22);
+      outline-offset: 3px;
+    }
 
     .grid {
       display: grid;
@@ -149,6 +170,25 @@
 
     @media (max-width: 767px) {
       .full-width { width: 100%; }
+      .print-actions { justify-content: stretch; }
+      .print-button { width: 100%; }
+    }
+
+    @media print {
+      @page { margin: 12mm; }
+      body {
+        padding: 0;
+        background: white;
+        color: #000;
+      }
+      .container { max-width: none; }
+      .back-link,
+      .print-actions { display: none !important; }
+      .header,
+      .card { box-shadow: none; }
+      .header { margin-bottom: 16px; }
+      .card { break-inside: avoid; }
+      .full-width { width: calc((100% - 20px) / 2); }
     }
   </style>
 </head>
@@ -159,6 +199,10 @@
   <div class="header">
     <h1>🍕 Pica droži</h1>
     <p>Prilagodite željene parametre, pekovske odstotke in razmerje različnih mok</p>
+  </div>
+
+  <div class="print-actions">
+    <button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button>
   </div>
 
   <div class="grid">
@@ -418,6 +462,11 @@
     }
 
     saveValues();
+  }
+
+  function saveAsPdf() {
+    calculate();
+    window.print();
   }
 
   function escapeHtml(text) {
