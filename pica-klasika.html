@@ -46,10 +46,29 @@
     .num { text-align: right; }
     #results td:last-child { font-weight: bold; }
     .total-row td { font-weight: bold; background-color: #fff5f5; color: #c53030; border-top: 2px solid #feb2b2; }
+
+    .print-actions { display:flex; justify-content:flex-end; margin-top:20px; }
+    .print-button { border:0; border-radius:8px; padding:10px 16px; background:#9b2c2c; color:white; font-size:16px; font-weight:700; cursor:pointer; }
+    .print-button:hover { background:#822727; }
+    .print-summary { display:none; }
+    @media(max-width:767px) { .print-button { width:100%; } .print-actions { justify-content:stretch; } }
+    @media print {
+      @page { size:A4 portrait; margin:10mm 12mm; }
+      body { padding:0; background:white; color:#111; font:9.5pt/1.15 Arial,sans-serif; }
+      .screen-content { display:none !important; }
+      .print-summary { display:block !important; width:100%; max-width:186mm; }
+      .print-summary h1 { margin:0 0 3mm; font-size:17pt; }
+      .print-meta { display:flex; gap:7mm; flex-wrap:wrap; margin-bottom:3mm; }
+      .print-summary table { margin:0; width:100%; border-collapse:collapse; }
+      .print-summary th,.print-summary td { padding:1mm 0; border:0; border-bottom:.15mm solid #ddd; background:transparent; color:#111; font-size:9pt; }
+      .print-summary th { text-align:left; }
+      .print-summary td:nth-child(n+2),.print-summary th:nth-child(n+2) { text-align:right; }
+      .print-summary .print-total td { border-top:.3mm solid #444; border-bottom:0; font-weight:700; }
+    }
   </style>
 </head>
 <body>
-<div class="container">
+<div class="container screen-content">
   <a class="back-link" href="pica.html">← Nazaj na izbiro pice</a>
   <div class="header">
     <h1>🍕 Pica klasika</h1>
@@ -100,7 +119,12 @@
       </div>
     </div>
   </div>
+  <div class="print-actions"><button type="button" class="print-button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
 </div>
+<section class="print-summary" id="print-summary" aria-hidden="true">
+  <h1>Pica klasika</h1><div class="print-meta" id="print-meta"></div>
+  <table><thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead><tbody id="print-ingredients"></tbody></table>
+</section>
 <script>
   const recipes = {
     classic: { water: 64, yeast: 1, salt: 2.2, sugar: 1.8, oil: 2 },
@@ -158,6 +182,20 @@
       <tr class="total-row"><td>Skupaj (${numPizzas} pic)</td><td class="num"></td><td class="num">${targetTotalWeight.toFixed(0)} g</td></tr>`;
     saveValues();
   }
+
+  function preparePrintSummary() {
+    calculate();
+    const val = id => parseFloat(document.getElementById(id).value)||0;
+    const pizzas=val('pizzas'),weight=val('weight'),total=pizzas*weight;
+    const items=[['Moka',100],['Voda',val('perc_water')],['Suhi kvas',val('perc_yeast')],['Sol',val('perc_salt')],['Sladkor',val('perc_sugar')],['Olje',val('perc_oil')]];
+    const flour=total/(items.reduce((sum, item)=>sum+item[1],0)/100);
+    const recipe=document.getElementById('recipe');
+    const recipeName=recipe.options[recipe.selectedIndex].text;
+    document.getElementById('print-meta').innerHTML=`<span><strong>${pizzas}</strong> pic</span><span><strong>${weight.toFixed(0)} g</strong> / hlebček</span><span>Skupaj <strong>${total.toFixed(0)} g</strong></span><span>Recept: <strong>${recipeName}</strong></span>`;
+    document.getElementById('print-ingredients').innerHTML=items.map(([name,percent])=>`<tr><td>${name}</td><td>${percent.toFixed(1)} %</td><td>${(flour*percent/100).toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj</td><td></td><td>${total.toFixed(0)}</td></tr>`;
+  }
+  function saveAsPdf() { preparePrintSummary(); window.print(); }
+  window.addEventListener('beforeprint',preparePrintSummary);
   loadSavedValues();
   calculate();
 </script>
