@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator kruha</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #fdfbf7;
+      color: #2d3748;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      color: #9b2c2c;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .header {
+      background: linear-gradient(135deg, #c53030, #9b2c2c);
+      color: #fff;
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 6px rgba(0,0,0,.05);
+    }
+    .header h1 { margin: 0 0 5px; font-size: 30px; }
+    .header p { margin: 0; opacity: .9; font-size: 16px; }
+    .print-actions { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+    .print-button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      background: #9b2c2c;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .print-button:hover { background: #822727; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0,0,0,.02);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #9b2c2c;
+      border-bottom: 2px solid #feb2b2;
+      padding-bottom: 8px;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #4a5568;
+    }
+    .form-group input,
+    .form-group select,
+    .flour-name,
+    .flour-percent {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 16px;
+      background: #fff;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .flour-name:focus,
+    .flour-percent:focus {
+      outline: none;
+      border-color: #c53030;
+      box-shadow: 0 0 0 3px rgba(197,48,48,.1);
+    }
+    .flour-name:disabled,
+    .flour-percent:disabled {
+      background: #edf2f7;
+      color: #a0aec0;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+    .hint { color: #718096; margin-top: -4px; }
+    .field-hint { margin: 5px 0 0; color: #718096; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; font-size: 16px; border-bottom: 1px solid #edf2f7; }
+    th { background: #fff5f5; color: #9b2c2c; text-align: left; }
+    .num { text-align: right; }
+    #results td:last-child,
+    #flour-results td:last-child { font-weight: 700; }
+    .total-row td {
+      font-weight: 700;
+      background: #fff5f5;
+      color: #c53030;
+      border-top: 2px solid #feb2b2;
+    }
+    .hydration-summary {
+      margin: 12px 0 0;
+      padding-top: 10px;
+      border-top: 1px solid #edf2f7;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2f855a;
+    }
+    .hydration-summary.error { color: #c53030; }
+    .full-width { margin-top: 20px; width: calc((100% - 20px) / 2); }
+    .flour-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 120px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .flour-summary { margin: 12px 0 0; font-size: 15px; font-weight: 700; }
+    .flour-summary.ok { color: #2f855a; }
+    .flour-summary.error { color: #c53030; }
+    .print-summary { display: none; }
+
+    @media (max-width: 767px) {
+      .full-width { width: 100%; }
+      .print-actions { justify-content: stretch; }
+      .print-button { width: 100%; }
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm 12mm; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        color: #111;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .screen-content { display: none !important; }
+      .print-summary {
+        display: block !important;
+        width: 100%;
+        max-width: 186mm;
+        margin: 0;
+        font-size: 9.5pt;
+        line-height: 1.15;
+      }
+      .print-summary h1 { margin: 0 0 2.5mm; font-size: 17pt; font-weight: 700; }
+      .print-meta {
+        display: flex;
+        gap: 7mm;
+        flex-wrap: wrap;
+        margin-bottom: 3mm;
+        font-size: 9.5pt;
+      }
+      .print-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+        align-items: start;
+      }
+      .print-section h2 {
+        margin: 0 0 1.5mm;
+        padding-bottom: 1mm;
+        border-bottom: .3mm solid #444;
+        font-size: 10.5pt;
+      }
+      .print-summary table { width: 100%; margin: 0; border-collapse: collapse; }
+      .print-summary th,
+      .print-summary td {
+        padding: .8mm 0;
+        border: 0;
+        border-bottom: .15mm solid #ddd;
+        background: transparent;
+        color: #111;
+        font-size: 9pt;
+      }
+      .print-summary th { font-weight: 700; text-align: left; }
+      .print-summary td:nth-child(2),
+      .print-summary td:nth-child(3),
+      .print-summary th:nth-child(2),
+      .print-summary th:nth-child(3) { text-align: right; }
+      .print-summary .print-total td {
+        padding-top: 1.2mm;
+        border-top: .3mm solid #444;
+        border-bottom: 0;
+        font-weight: 700;
+      }
+      .print-note {
+        margin: 2.5mm 0 0;
+        padding-top: 1.5mm;
+        border-top: .2mm solid #bbb;
+        font-size: 8.5pt;
+      }
+    }
+  
+  .form-group input[type="text"] { width:100%; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
+  .addition-grid { display:grid; grid-template-columns: minmax(0, 1fr) 110px; gap:10px; margin-bottom:10px; }
+  .addition-grid input { width:100%; min-width:0; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
+</style>
+</head>
+<body>
+<div class="screen-content"><div class="container">
+<a class="back-link" href="index.html">← Nazaj na izbiro receptov</a>
+<div class="header"><h1>🍞 Kruh</h1><p>Izračun sestavin glede na količino moke in pekovske odstotke</p></div>
+<div class="print-actions"><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
+<div class="grid"><div>
+<div class="card" style="margin-bottom:20px">
+<h2>1. Osnovni podatki</h2>
+<div class="form-group"><label for="flour1">Moka 1 (g):</label><input type="number" id="flour1" min="0" step="1" value="700" oninput="calculate()"></div>
+<div class="form-group"><label for="flour2">Moka 2 (g):</label><input type="number" id="flour2" min="0" step="1" value="300" oninput="calculate()"></div>
+<p id="flour-total" class="flour-summary"></p>
+<p class="field-hint">Pekovski odstotki se računajo glede na vsoto moke 1 in moke 2; moka iz droži je dodatno upoštevana pri hidraciji.</p>
+</div>
+<div class="card">
+<h2>2. Nastavitev pekovskih %</h2>
+<p class="hint">Skupna osnovna moka predstavlja 100 %.</p>
+<div class="form-group"><label for="recipe">Izberi recept:</label><select id="recipe" onchange="applyRecipe()"><option value="classic" selected>Klasični</option><option value="matej">Matej</option><option value="marko">Marko</option><option value="bostjan">Boštjan</option><option value="manual">Ročna nastavitev</option></select></div>
+<div class="form-group"><label for="perc_water">Hidracija (%):</label><input id="perc_water" type="number" min="0" step="0.5" value="64" oninput="setManualRecipe();calculate()"><p class="field-hint">Končna hidracija vključuje vodo in moko v drožeh.</p></div>
+<div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input id="perc_yeast" type="number" min="0" step="0.1" value="1" oninput="setManualRecipe();calculate()"></div>
+<div class="form-group"><label for="perc_sourdough">Droži (%):</label><input id="perc_sourdough" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"><p class="field-hint">Droži imajo 100 % hidratacijo (polovica moka, polovica voda).</p></div>
+<div class="form-group"><label for="perc_salt">Sol (%):</label><input id="perc_salt" type="number" min="0" step="0.1" value="2.2" oninput="setManualRecipe();calculate()"></div>
+<p class="hint">Ime dodatka lahko poljubno spremeniš. Količine so določene v pekovskih %.</p>
+<div class="addition-grid"><input id="add_name_1" type="text" value="Dodatek 1" aria-label="Ime dodatka 1" oninput="calculate()"><input id="add_pct_1" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 1" oninput="setManualRecipe();calculate()"></div>
+<div class="addition-grid"><input id="add_name_2" type="text" value="Dodatek 2" aria-label="Ime dodatka 2" oninput="calculate()"><input id="add_pct_2" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 2" oninput="setManualRecipe();calculate()"></div>
+<div class="addition-grid"><input id="add_name_3" type="text" value="Dodatek 3" aria-label="Ime dodatka 3" oninput="calculate()"><input id="add_pct_3" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 3" oninput="setManualRecipe();calculate()"></div>
+</div></div>
+<div><div class="card"><h2>3. Izračunane količine</h2><table><thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead><tbody id="results"></tbody></table><p id="hydration-summary" class="hydration-summary"></p></div></div>
+</div></div></div>
+<section id="print-summary" class="print-summary" aria-hidden="true">
+<h1>Kruh</h1><div class="print-meta" id="print-meta"></div>
+<div class="print-section"><h2>Sestavine</h2><table><thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead><tbody id="print-ingredients"></tbody></table></div>
+<p class="print-note" id="print-note"></p>
+</section>
+<script>
+const recipes = {
+  classic:{water:64,yeast:1,sourdough:0,salt:2.2,adds:[0,0,0]},
+  matej:{water:64,yeast:0.6,sourdough:0,salt:2.2,adds:[0,0,0]},
+  marko:{water:60,yeast:1,sourdough:0,salt:2.2,adds:[0,0,0]},
+  bostjan:{water:63.4,yeast:0.142,sourdough:0,salt:3,adds:[0,0,0]}
+};
+const ids=['flour1','flour2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt',
+'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3'];
+const el=id=>document.getElementById(id);
+const amount=id=>Math.max(0,parseFloat(el(id).value)||0);
+const safe=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+function loadSavedValues(){try{const v=JSON.parse(localStorage.getItem('breadCalculatorValues'));if(v)ids.forEach(id=>{if(v[id]!==undefined)el(id).value=v[id];});}catch(e){}}
+function saveValues(){try{const v={};ids.forEach(id=>v[id]=el(id).value);localStorage.setItem('breadCalculatorValues',JSON.stringify(v));}catch(e){}}
+function setManualRecipe(){el('recipe').value='manual';}
+function applyRecipe(){
+ const r=recipes[el('recipe').value];
+ if(r){el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;
+ r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);}
+ calculate();
+}
+function getRecipeData(){
+ const f1=amount('flour1'),f2=amount('flour2'),flour=f1+f2;
+ const hydration=amount('perc_water'),yeast=amount('perc_yeast'),starter=amount('perc_sourdough'),salt=amount('perc_salt');
+ const additions=[1,2,3].map(i=>({name:el('add_name_'+i).value.trim()||'Dodatek '+i,pct:amount('add_pct_'+i)}));
+ const addedWaterPct=Math.max(0,hydration*(100+starter/2)/100-starter/2);
+ const actualHydration=(addedWaterPct+starter/2)/(100+starter/2)*100;
+ const ingredients=[
+ ['Moka 1',flour?f1/flour*100:0,f1],['Moka 2',flour?f2/flour*100:0,f2],
+ ['Voda za dodati',addedWaterPct,flour*addedWaterPct/100],
+ ['Suhi kvas',yeast,flour*yeast/100],['Droži',starter,flour*starter/100],['Sol',salt,flour*salt/100],
+ ...additions.map(a=>[a.name,a.pct,flour*a.pct/100])
+ ];
+ const total=ingredients.reduce((s,x)=>s+x[2],0);
+ return {f1,f2,flour,total,hydration,actualHydration,addedWaterPct,starter,
+ hydrationPossible:hydration*(100+starter/2)/100>=starter/2,ingredients};
+}
+function calculate(){
+ const d=getRecipeData();
+ el('flour-total').textContent='Skupaj osnovna moka: '+d.flour.toFixed(1)+' g';
+ el('results').innerHTML=d.ingredients.map(([name,pct,g])=>`<tr><td>${safe(name)}</td><td class="num">${pct.toFixed(1)} %</td><td class="num">${g.toFixed(1)} g</td></tr>`).join('')+
+ `<tr class="total-row"><td>Skupaj testo</td><td></td><td class="num">${d.total.toFixed(1)} g</td></tr>`;
+ const h=el('hydration-summary');
+ h.textContent=d.hydrationPossible
+ ? `Končna hidracija: ${d.actualHydration.toFixed(1)} % · voda za dodati: ${d.addedWaterPct.toFixed(1)} %`
+ : `Izbrana hidracija je prenizka za ${d.starter.toFixed(1)} % droži. Vode ni treba dodati; dejanska hidracija je ${d.actualHydration.toFixed(1)} %.`;
+ h.className='hydration-summary'+(d.hydrationPossible?'':' error');
+ saveValues();
+}
+function preparePrintSummary(){
+ const d=getRecipeData(),sel=el('recipe');
+ el('print-meta').innerHTML=`<span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
+ el('print-ingredients').innerHTML=d.ingredients.map(([n,p,g])=>`<tr><td>${safe(n)}</td><td>${p.toFixed(1)} %</td><td>${g.toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj testo</td><td></td><td>${d.total.toFixed(1)}</td></tr>`;
+ el('print-note').textContent='Droži: 100 % hidracija (50 % moka, 50 % voda). '+(d.hydrationPossible?'':'Opozorilo: želena hidracija ni dosegljiva brez zmanjšanja deleža droži.');
+}
+function saveAsPdf(){preparePrintSummary();window.print();}
+window.addEventListener('beforeprint',preparePrintSummary);
+loadSavedValues();calculate();
+</script></body></html>
