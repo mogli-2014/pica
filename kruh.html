@@ -209,7 +209,9 @@
     }
   
   .form-group input[type="text"] { width:100%; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
-  .addition-grid { display:grid; grid-template-columns: minmax(0, 1fr) 110px; gap:10px; margin-bottom:10px; }
+  .addition-grid { display:grid; grid-template-columns: minmax(0, 1fr) 20px 110px; gap:7px; align-items:center; margin-bottom:10px; }
+  .unit { text-align:center; font-weight:700; color:#718096; }
+  @media(max-width:420px) { .addition-grid { grid-template-columns:minmax(0,1fr) 16px 85px; gap:5px; } }
   .addition-grid input { width:100%; min-width:0; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
 </style>
 </head>
@@ -221,23 +223,23 @@
 <div class="grid"><div>
 <div class="card" style="margin-bottom:20px">
 <h2>1. Osnovni podatki</h2>
-<div class="form-group"><label for="flour1">Moka 1 (g):</label><input type="number" id="flour1" min="0" step="1" value="700" oninput="calculate()"></div>
-<div class="form-group"><label for="flour2">Moka 2 (g):</label><input type="number" id="flour2" min="0" step="1" value="300" oninput="calculate()"></div>
+<div class="addition-grid"><input type="text" id="flour_name_1" value="Moka 1" aria-label="Ime moke 1" oninput="calculate()"><span class="unit">g</span><input type="number" id="flour1" min="0" step="1" value="300" aria-label="Moka 1 v gramih" oninput="calculate()"></div>
+<div class="addition-grid"><input type="text" id="flour_name_2" value="Moka 2" aria-label="Ime moke 2" oninput="calculate()"><span class="unit">g</span><input type="number" id="flour2" min="0" step="1" value="200" aria-label="Moka 2 v gramih" oninput="calculate()"></div>
 <p id="flour-total" class="flour-summary"></p>
 <p class="field-hint">Pekovski odstotki se računajo glede na vsoto moke 1 in moke 2; moka iz droži je dodatno upoštevana pri hidraciji.</p>
 </div>
 <div class="card">
 <h2>2. Nastavitev pekovskih %</h2>
 <p class="hint">Skupna osnovna moka predstavlja 100 %.</p>
-<div class="form-group"><label for="recipe">Izberi recept:</label><select id="recipe" onchange="applyRecipe()"><option value="classic" selected>Klasični</option><option value="matej">Matej</option><option value="marko">Marko</option><option value="bostjan">Boštjan</option><option value="manual">Ročna nastavitev</option></select></div>
-<div class="form-group"><label for="perc_water">Hidracija (%):</label><input id="perc_water" type="number" min="0" step="0.5" value="64" oninput="setManualRecipe();calculate()"><p class="field-hint">Končna hidracija vključuje vodo in moko v drožeh.</p></div>
-<div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input id="perc_yeast" type="number" min="0" step="0.1" value="1" oninput="setManualRecipe();calculate()"></div>
-<div class="form-group"><label for="perc_sourdough">Droži (%):</label><input id="perc_sourdough" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"><p class="field-hint">Droži imajo 100 % hidratacijo (polovica moka, polovica voda).</p></div>
-<div class="form-group"><label for="perc_salt">Sol (%):</label><input id="perc_salt" type="number" min="0" step="0.1" value="2.2" oninput="setManualRecipe();calculate()"></div>
+<div class="form-group"><label for="recipe">Izberi recept:</label><select id="recipe" onchange="applyRecipe()"><option value="classic" selected>Rženi kruh</option><option value="matej">Matej</option><option value="marko">Marko</option><option value="bostjan">Boštjan</option><option value="manual">Ročna nastavitev</option></select></div>
+<div class="form-group"><label for="perc_water">Hidracija (%):</label><input id="perc_water" type="number" min="0" step="0.5" value="90" oninput="setManualRecipe();calculate()"><p class="field-hint">Končna hidracija vključuje vodo in moko v drožeh.</p></div>
+<div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input id="perc_yeast" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"></div>
+<div class="form-group"><label for="perc_sourdough">Droži (%):</label><input id="perc_sourdough" type="number" min="0" step="0.1" value="20" oninput="setManualRecipe();calculate()"><p class="field-hint">Droži imajo 100 % hidratacijo (polovica moka, polovica voda).</p></div>
+<div class="form-group"><label for="perc_salt">Sol (%):</label><input id="perc_salt" type="number" min="0" step="0.1" value="2" oninput="setManualRecipe();calculate()"></div>
 <p class="hint">Ime dodatka lahko poljubno spremeniš. Količine so določene v pekovskih %.</p>
-<div class="addition-grid"><input id="add_name_1" type="text" value="Dodatek 1" aria-label="Ime dodatka 1" oninput="calculate()"><input id="add_pct_1" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 1" oninput="setManualRecipe();calculate()"></div>
-<div class="addition-grid"><input id="add_name_2" type="text" value="Dodatek 2" aria-label="Ime dodatka 2" oninput="calculate()"><input id="add_pct_2" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 2" oninput="setManualRecipe();calculate()"></div>
-<div class="addition-grid"><input id="add_name_3" type="text" value="Dodatek 3" aria-label="Ime dodatka 3" oninput="calculate()"><input id="add_pct_3" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 3" oninput="setManualRecipe();calculate()"></div>
+<div class="addition-grid"><input id="add_name_1" type="text" value="Kumina" aria-label="Ime dodatka 1" oninput="calculate()"><span class="unit">%</span><input id="add_pct_1" type="number" min="0" step="0.1" value="0.4" aria-label="Odstotek dodatka 1" oninput="setManualRecipe();calculate()"></div>
+<div class="addition-grid"><input id="add_name_2" type="text" value="Dodatek 2" aria-label="Ime dodatka 2" oninput="calculate()"><span class="unit">%</span><input id="add_pct_2" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 2" oninput="setManualRecipe();calculate()"></div>
+<div class="addition-grid"><input id="add_name_3" type="text" value="Dodatek 3" aria-label="Ime dodatka 3" oninput="calculate()"><span class="unit">%</span><input id="add_pct_3" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 3" oninput="setManualRecipe();calculate()"></div>
 </div></div>
 <div><div class="card"><h2>3. Izračunane količine</h2><table><thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead><tbody id="results"></tbody></table><p id="hydration-summary" class="hydration-summary"></p></div></div>
 </div></div></div>
@@ -248,23 +250,28 @@
 </section>
 <script>
 const recipes = {
-  classic:{water:64,yeast:1,sourdough:0,salt:2.2,adds:[0,0,0]},
+  classic:{flours:[300,200],flourNames:["Moka 1","Moka 2"],water:90,yeast:0,sourdough:20,salt:2,adds:[0.4,0,0],addNames:["Kumina","Dodatek 2","Dodatek 3"]},
   matej:{water:64,yeast:0.6,sourdough:0,salt:2.2,adds:[0,0,0]},
   marko:{water:60,yeast:1,sourdough:0,salt:2.2,adds:[0,0,0]},
   bostjan:{water:63.4,yeast:0.142,sourdough:0,salt:3,adds:[0,0,0]}
 };
-const ids=['flour1','flour2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt',
+const ids=['flour1','flour2','flour_name_1','flour_name_2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt',
 'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3'];
 const el=id=>document.getElementById(id);
 const amount=id=>Math.max(0,parseFloat(el(id).value)||0);
 const safe=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
-function loadSavedValues(){try{const v=JSON.parse(localStorage.getItem('breadCalculatorValues'));if(v)ids.forEach(id=>{if(v[id]!==undefined)el(id).value=v[id];});}catch(e){}}
-function saveValues(){try{const v={};ids.forEach(id=>v[id]=el(id).value);localStorage.setItem('breadCalculatorValues',JSON.stringify(v));}catch(e){}}
+function loadSavedValues(){try{const v=JSON.parse(localStorage.getItem('breadCalculatorValuesV2'));if(v)ids.forEach(id=>{if(v[id]!==undefined)el(id).value=v[id];});}catch(e){}}
+function saveValues(){try{const v={};ids.forEach(id=>v[id]=el(id).value);localStorage.setItem('breadCalculatorValuesV2',JSON.stringify(v));}catch(e){}}
 function setManualRecipe(){el('recipe').value='manual';}
 function applyRecipe(){
  const r=recipes[el('recipe').value];
- if(r){el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;
- r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);}
+ if(r){
+ if(r.flours)r.flours.forEach((v,i)=>el('flour'+(i+1)).value=v);
+ if(r.flourNames)r.flourNames.forEach((v,i)=>el('flour_name_'+(i+1)).value=v);
+ el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;
+ r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);
+ if(r.addNames)r.addNames.forEach((v,i)=>el('add_name_'+(i+1)).value=v);
+}
  calculate();
 }
 function getRecipeData(){
@@ -274,7 +281,7 @@ function getRecipeData(){
  const addedWaterPct=Math.max(0,hydration*(100+starter/2)/100-starter/2);
  const actualHydration=(addedWaterPct+starter/2)/(100+starter/2)*100;
  const ingredients=[
- ['Moka 1',flour?f1/flour*100:0,f1],['Moka 2',flour?f2/flour*100:0,f2],
+ [(el('flour_name_1').value.trim()||'Moka 1'),flour?f1/flour*100:0,f1],[(el('flour_name_2').value.trim()||'Moka 2'),flour?f2/flour*100:0,f2],
  ['Voda za dodati',addedWaterPct,flour*addedWaterPct/100],
  ['Suhi kvas',yeast,flour*yeast/100],['Droži',starter,flour*starter/100],['Sol',salt,flour*salt/100],
  ...additions.map(a=>[a.name,a.pct,flour*a.pct/100])
