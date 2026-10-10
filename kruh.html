@@ -209,6 +209,7 @@
     }
   
   .form-group input[type="text"] { width:100%; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   .addition-grid { display:grid; grid-template-columns: minmax(0, 1fr) 20px 110px; gap:7px; align-items:center; margin-bottom:10px; }
   .unit { text-align:center; font-weight:700; color:#718096; }
   @media(max-width:420px) { .addition-grid { grid-template-columns:minmax(0,1fr) 16px 85px; gap:5px; } }
@@ -223,7 +224,7 @@
 <div class="grid"><div>
 <div class="card" style="margin-bottom:20px">
 <h2>1. Izberi recept</h2>
-<div class="form-group"><label for="recipe">Izberi recept:</label><select id="recipe" onchange="applyRecipe()"><option value="classic" selected>Rženi kruh</option><option value="matej">Matej</option><option value="marko">Marko</option><option value="bostjan">Boštjan</option><option value="manual">Ročna nastavitev</option></select></div>
+<div class="form-group"><label for="recipe" class="sr-only">Recept:</label><select id="recipe" onchange="applyRecipe()"><option value="classic" selected>Rženi kruh</option><option value="matej">Matej</option><option value="marko">Marko</option><option value="bostjan">Boštjan</option><option value="manual">Ročna nastavitev</option></select></div>
 </div>
 <div class="card">
 <h2>2. Nastavitev pekovskih %</h2>
