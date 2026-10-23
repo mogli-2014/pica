@@ -50,6 +50,16 @@
     .print-actions { display:flex; justify-content:flex-end; margin-top:20px; }
     .print-button { border:0; border-radius:8px; padding:10px 16px; background:#9b2c2c; color:white; font-size:16px; font-weight:700; cursor:pointer; }
     .print-button:hover { background:#822727; }
+    .print-actions { gap: 10px; flex-wrap: wrap; }
+    .notes-button {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid #9b2c2c; border-radius: 8px; padding: 9px 16px;
+      background: #fff; color: #9b2c2c; font-size: 16px; font-weight: 700;
+      text-decoration: none;
+    }
+    .notes-button:hover { background: #fff5f5; }
+    .notes-button:focus-visible { outline: 3px solid #feb2b2; outline-offset: 3px; }
+    @media (max-width: 767px) { .notes-button { width: 100%; } }
     .print-summary { display:none; }
     @media(max-width:767px) { .print-button { width:100%; } .print-actions { justify-content:stretch; } }
     @media print {
@@ -119,7 +129,7 @@
       </div>
     </div>
   </div>
-  <div class="print-actions"><button type="button" class="print-button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
+  <div class="print-actions"><a class="notes-button" href="zapiski-pica.html?iz=pica-klasika">📝 Zapiski</a><button type="button" class="print-button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
 </div>
 <section class="print-summary" id="print-summary" aria-hidden="true">
   <h1>Pica klasika</h1><div class="print-meta" id="print-meta"></div>
