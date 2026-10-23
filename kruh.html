@@ -133,6 +133,16 @@
     .flour-summary { margin: 12px 0 0; font-size: 15px; font-weight: 700; }
     .flour-summary.ok { color: #2f855a; }
     .flour-summary.error { color: #c53030; }
+    .print-actions { gap: 10px; flex-wrap: wrap; }
+    .notes-button {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid #9b2c2c; border-radius: 8px; padding: 9px 16px;
+      background: #fff; color: #9b2c2c; font-size: 16px; font-weight: 700;
+      text-decoration: none;
+    }
+    .notes-button:hover { background: #fff5f5; }
+    .notes-button:focus-visible { outline: 3px solid #feb2b2; outline-offset: 3px; }
+    @media (max-width: 767px) { .notes-button { width: 100%; } }
     .print-summary { display: none; }
 
     @media (max-width: 767px) {
@@ -243,7 +253,7 @@
 <div class="addition-grid"><input id="add_name_3" type="text" value="Dodatek 3" aria-label="Ime dodatka 3" oninput="calculate()"><span class="unit">%</span><input id="add_pct_3" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 3" oninput="setManualRecipe();calculate()"></div>
 </div></div>
 <div><div class="card"><h2>3. Izračunane količine</h2><table><thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead><tbody id="results"></tbody></table><p id="hydration-summary" class="hydration-summary"></p></div></div>
-</div></div><div class="print-actions" style="margin-top:20px;margin-bottom:0"><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div></div>
+</div></div><div class="print-actions" style="margin-top:20px;margin-bottom:0"><a class="notes-button" href="zapiski-kruh.html">📝 Zapiski</a><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div></div>
 <section id="print-summary" class="print-summary" aria-hidden="true">
 <h1>Kruh</h1><div class="print-meta" id="print-meta"></div>
 <div class="print-section"><h2>Sestavine</h2><table><thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead><tbody id="print-ingredients"></tbody></table></div>
