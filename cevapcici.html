@@ -124,6 +124,36 @@
       color: #c53030;
       font-weight: bold;
     }
+    .print-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+    .print-button {
+      border: 0; border-radius: 8px; padding: 10px 16px;
+      background: #9b2c2c; color: #fff; font-size: 16px;
+      font-weight: 700; cursor: pointer;
+    }
+    .print-button:hover { background: #822727; }
+    .print-button:focus-visible { outline: 3px solid #feb2b2; outline-offset: 3px; }
+    .print-summary { display: none; }
+    @media (max-width: 767px) {
+      .print-actions { justify-content: stretch; }
+      .print-button { width: 100%; }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 10mm 12mm; }
+      body { padding: 0; background: white; color: #111; font: 9.5pt/1.15 Arial, sans-serif; }
+      .screen-content { display: none !important; }
+      .print-summary { display: block !important; width: 100%; max-width: 186mm; }
+      .print-summary h1 { margin: 0 0 3mm; font-size: 17pt; }
+      .print-meta { display: flex; gap: 7mm; flex-wrap: wrap; margin-bottom: 3mm; }
+      .print-summary table { width: 100%; margin: 0; border-collapse: collapse; }
+      .print-summary th, .print-summary td {
+        padding: 1mm 0; border: 0; border-bottom: .15mm solid #ddd;
+        background: transparent; color: #111; font-size: 9pt;
+      }
+      .print-summary th { text-align: left; }
+      .print-summary td:nth-child(n+2), .print-summary th:nth-child(n+2) { text-align: right; }
+      .print-summary .print-total td { border-top: .3mm solid #444; border-bottom: 0; font-weight: 700; }
+      .print-note { margin-top: 3mm; font-size: 8.5pt; color: #555; }
+    }
     @media (max-width: 480px) {
       body { padding: 14px; }
       .header { padding: 18px; }
@@ -134,7 +164,7 @@
   </style>
 </head>
 <body>
-  <main class="container">
+  <main class="container screen-content">
     <a class="back-link" href="index.html">← Nazaj na izbiro receptov</a>
 
     <header class="header">
@@ -215,7 +245,23 @@
         </section>
       </div>
     </div>
+    <div class="print-actions">
+      <button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button>
+    </div>
   </main>
+
+  <section class="print-summary" aria-hidden="true">
+    <h1>Čevapčiči</h1>
+    <div class="print-meta">
+      <span>Meso: <strong id="print-meat"></strong></span>
+      <span>Skupaj: <strong id="print-total"></strong></span>
+    </div>
+    <table>
+      <thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead>
+      <tbody id="print-ingredients"></tbody>
+    </table>
+    <p class="print-note">Odstotki dodatkov so izračunani glede na količino mesa.</p>
+  </section>
 
   <script>
     const ingredients = [
@@ -304,6 +350,30 @@
 
       saveValues();
     }
+
+    function preparePrintSummary() {
+      const meatGrams = numberValue('meat');
+      let additivesGrams = 0;
+      const rows = ingredients.map((ingredient) => {
+        const percentage = numberValue(ingredient.id);
+        const grams = meatGrams * percentage / 100;
+        additivesGrams += grams;
+        return `<tr><td>${ingredient.name}</td><td>${formatNumber(percentage, 3)} %</td><td>${formatNumber(grams, 1)}</td></tr>`;
+      }).join('');
+      const totalGrams = meatGrams + additivesGrams;
+      document.getElementById('print-meat').textContent = formatNumber(meatGrams, 1) + ' g';
+      document.getElementById('print-total').textContent = formatNumber(totalGrams, 1) + ' g';
+      document.getElementById('print-ingredients').innerHTML =
+        `<tr><td>Meso</td><td>100,000 %</td><td>${formatNumber(meatGrams, 1)}</td></tr>` +
+        rows +
+        `<tr class="print-total"><td>Skupaj</td><td></td><td>${formatNumber(totalGrams, 1)}</td></tr>`;
+    }
+
+    function saveAsPdf() {
+      preparePrintSummary();
+      window.print();
+    }
+    window.addEventListener('beforeprint', preparePrintSummary);
 
     inputIds.forEach((id) => {
       document.getElementById(id).addEventListener('input', calculate);
