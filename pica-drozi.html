@@ -266,7 +266,7 @@
               <option value="classic" selected>Klasični</option>
               <option value="matej">Matej</option>
               <option value="marko">Marko</option>
-              <option value="bostjan">Boštjan</option>
+              <option value="testoDrozi">Testo z drožmi</option>
               <option value="manual">Ročna nastavitev</option>
             </select>
           </div>
@@ -377,7 +377,7 @@
     classic: { water: 64, yeast: 1, sourdough: 0, salt: 2.2, sugar: 1.8, oil: 2 },
     matej: { water: 64, yeast: 0.6, sourdough: 0, salt: 2.2, sugar: 1.8, oil: 2 },
     marko: { water: 60, yeast: 1, sourdough: 0, salt: 2.2, sugar: 1.8, oil: 2 },
-    bostjan: { water: 63.4, yeast: 0.142, sourdough: 0, salt: 3, sugar: 0, oil: 0 }
+    testoDrozi: { water: 68, yeast: 0, sourdough: 15, salt: 2.8, sugar: 0, oil: 2 }
   };
 
   const inputIds = [
@@ -392,6 +392,8 @@
     try {
       const savedValues = JSON.parse(localStorage.getItem('pizzaSourdoughCalculatorValues'));
       if (!savedValues) return;
+      // Stare nastavitve "Boštjan" ostanejo ohranjene kot ročni recept.
+      if (savedValues.recipe === 'bostjan') savedValues.recipe = 'manual';
       inputIds.forEach(id => {
         if (savedValues[id] !== undefined) document.getElementById(id).value = savedValues[id];
       });
