@@ -47,6 +47,13 @@
     #results td:last-child { font-weight: bold; }
     .total-row td { font-weight: bold; background-color: #fff5f5; color: #c53030; border-top: 2px solid #feb2b2; }
 
+    .hydration-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .hydration-metric { min-width: 0; padding: 14px 10px; border-radius: 10px; background: #f7fafc; text-align: center; }
+    .hydration-metric strong { display: block; font-size: 24px; line-height: 1.25; }
+    .hydration-metric span { display: block; margin-top: 4px; font-size: 13px; }
+    .hydration-metric.combined { background: #e8f7ed; color: #008b45; }
+    .print-hydration { margin-top: 3mm; font-weight: 700; }
+
     .print-actions { display:flex; justify-content:flex-end; margin-top:20px; }
     .print-button { border:0; border-radius:8px; padding:10px 16px; background:#9b2c2c; color:white; font-size:16px; font-weight:700; cursor:pointer; }
     .print-button:hover { background:#822727; }
@@ -126,6 +133,10 @@
           <thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead>
           <tbody id="results"></tbody>
         </table>
+          <div class="hydration-values" aria-label="Hidracija testa">
+            <div class="hydration-metric"><strong id="water-hydration">64,0 %</strong><span>Vodna hidracija</span></div>
+            <div class="hydration-metric combined"><strong id="combined-hydration">66,0 %</strong><span>Voda + olje</span></div>
+          </div>
       </div>
     </div>
   </div>
@@ -134,6 +145,7 @@
 <section class="print-summary" id="print-summary" aria-hidden="true">
   <h1>Pica klasika</h1><div class="print-meta" id="print-meta"></div>
   <table><thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead><tbody id="print-ingredients"></tbody></table>
+  <div class="print-hydration">Vodna hidracija: <strong id="print-water-hydration"></strong> · Voda + olje: <strong id="print-combined-hydration"></strong></div>
 </section>
 <script>
   const recipes = {
@@ -170,6 +182,7 @@
     calculate();
   }
   function setManualRecipe() { document.getElementById('recipe').value = 'manual'; }
+  function formatHydration(value) { return value.toFixed(1).replace('.', ',') + ' %'; }
   function calculate() {
     const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
     const pizzaWeight = parseFloat(document.getElementById('weight').value) || 0;
@@ -184,12 +197,14 @@
     const calcGrams = (perc) => (flourGrams * (perc / 100)).toFixed(1);
     document.getElementById('results').innerHTML = `
       <tr><td>Moka</td><td class="num">100.0 %</td><td class="num">${flourGrams.toFixed(1)} g</td></tr>
-      <tr><td>Voda</td><td class="num">${percWater.toFixed(1)} %</td><td class="num">${calcGrams(percWater)} g</td></tr>
+      <tr><td>Voda za dodati</td><td class="num">${percWater.toFixed(1)} %</td><td class="num">${calcGrams(percWater)} g</td></tr>
       <tr><td>Suhi kvas</td><td class="num">${percYeast.toFixed(1)} %</td><td class="num">${calcGrams(percYeast)} g</td></tr>
       <tr><td>Sol</td><td class="num">${percSalt.toFixed(1)} %</td><td class="num">${calcGrams(percSalt)} g</td></tr>
       <tr><td>Sladkor</td><td class="num">${percSugar.toFixed(1)} %</td><td class="num">${calcGrams(percSugar)} g</td></tr>
       <tr><td>Olje</td><td class="num">${percOil.toFixed(1)} %</td><td class="num">${calcGrams(percOil)} g</td></tr>
       <tr class="total-row"><td>Skupaj (${numPizzas} pic)</td><td class="num"></td><td class="num">${targetTotalWeight.toFixed(0)} g</td></tr>`;
+    document.getElementById('water-hydration').textContent = formatHydration(percWater);
+    document.getElementById('combined-hydration').textContent = formatHydration(percWater + percOil);
     saveValues();
   }
 
@@ -197,12 +212,14 @@
     calculate();
     const val = id => parseFloat(document.getElementById(id).value)||0;
     const pizzas=val('pizzas'),weight=val('weight'),total=pizzas*weight;
-    const items=[['Moka',100],['Voda',val('perc_water')],['Suhi kvas',val('perc_yeast')],['Sol',val('perc_salt')],['Sladkor',val('perc_sugar')],['Olje',val('perc_oil')]];
+    const items=[['Moka',100],['Voda za dodati',val('perc_water')],['Suhi kvas',val('perc_yeast')],['Sol',val('perc_salt')],['Sladkor',val('perc_sugar')],['Olje',val('perc_oil')]];
     const flour=total/(items.reduce((sum, item)=>sum+item[1],0)/100);
     const recipe=document.getElementById('recipe');
     const recipeName=recipe.options[recipe.selectedIndex].text;
     document.getElementById('print-meta').innerHTML=`<span><strong>${pizzas}</strong> pic</span><span><strong>${weight.toFixed(0)} g</strong> / hlebček</span><span>Skupaj <strong>${total.toFixed(0)} g</strong></span><span>Recept: <strong>${recipeName}</strong></span>`;
     document.getElementById('print-ingredients').innerHTML=items.map(([name,percent])=>`<tr><td>${name}</td><td>${percent.toFixed(1)} %</td><td>${(flour*percent/100).toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj</td><td></td><td>${total.toFixed(0)}</td></tr>`;
+    document.getElementById('print-water-hydration').textContent = formatHydration(val('perc_water'));
+    document.getElementById('print-combined-hydration').textContent = formatHydration(val('perc_water') + val('perc_oil'));
   }
   function saveAsPdf() { preparePrintSummary(); window.print(); }
   window.addEventListener('beforeprint',preparePrintSummary);
