@@ -122,6 +122,13 @@
       color: #2f855a;
     }
     .hydration-summary.error { color: #c53030; }
+
+    .hydration-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .hydration-metric { min-width: 0; padding: 14px 10px; border-radius: 10px; background: #f7fafc; text-align: center; }
+    .hydration-metric strong { display: block; font-size: 24px; line-height: 1.25; }
+    .hydration-metric span { display: block; margin-top: 4px; font-size: 13px; }
+    .hydration-metric.combined { background: #e8f7ed; color: #008b45; }
+    .print-hydration { margin-top: 3mm; font-weight: 700; }
     .full-width { margin-top: 20px; width: calc((100% - 20px) / 2); }
     .flour-grid {
       display: grid;
@@ -265,9 +272,9 @@
           </div>
 
           <div class="form-group">
-            <label for="perc_water">Hidracija (%):</label>
+            <label for="perc_water">Vodna hidracija (%):</label>
             <input type="number" id="perc_water" value="64.0" step="0.5" min="0" oninput="setManualRecipe(); calculate()">
-            <p class="field-hint">Vpiši želeno končno hidratacijo testa.</p>
+            <p class="field-hint">Voda iz droži se upošteva; olje je prikazano posebej.</p>
           </div>
           <div class="form-group">
             <label for="perc_yeast">Suhi kvas (%):</label>
@@ -300,7 +307,7 @@
             <thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead>
             <tbody id="results"></tbody>
           </table>
-          <p id="hydration-summary" class="hydration-summary"></p>
+          <p id="hydration-summary" class="hydration-summary error" hidden></p>
         </div>
       </div>
     </div>
@@ -332,6 +339,12 @@
       </table>
       <p id="flour-summary" class="flour-summary"></p>
     </div>
+    <div class="card" style="margin-top:20px">
+      <div class="hydration-values" aria-label="Hidracija testa">
+            <div class="hydration-metric"><strong id="water-hydration">64,0 %</strong><span>Vodna hidracija</span></div>
+            <div class="hydration-metric combined"><strong id="combined-hydration">66,0 %</strong><span>Voda + olje</span></div>
+          </div>
+    </div>
   </div>
   <div class="print-actions" style="margin-top:20px;margin-bottom:0"><a class="notes-button" href="zapiski-pica.html?iz=pica-drozi">📝 Zapiski</a><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
 </div>
@@ -356,6 +369,7 @@
     </div>
   </div>
   <div class="print-note" id="print-note"></div>
+  <div class="print-hydration">Vodna hidracija: <strong id="print-water-hydration"></strong> · Voda + olje: <strong id="print-combined-hydration"></strong></div>
 </section>
 
 <script>
@@ -410,6 +424,8 @@
     document.getElementById('recipe').value = 'manual';
   }
 
+  function formatHydration(value) { return value.toFixed(1).replace('.', ',') + ' %'; }
+
   function getRecipeData() {
     const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
     const pizzaWeight = parseFloat(document.getElementById('weight').value) || 0;
@@ -432,6 +448,9 @@
     const actualHydration = totalFlourPercent > 0
       ? (addedWaterPercent + starterWaterPercent) / totalFlourPercent * 100
       : 0;
+    const totalLiquidHydration = totalFlourPercent > 0
+      ? (addedWaterPercent + starterWaterPercent + percOil) / totalFlourPercent * 100
+      : 0;
 
     const targetTotalWeight = numPizzas * pizzaWeight;
     const totalPercentage = 100 + addedWaterPercent + percYeast + percSourdough + percSalt + percSugar + percOil;
@@ -444,6 +463,7 @@
       flourGrams,
       hydration,
       actualHydration,
+      totalLiquidHydration,
       hydrationPossible: rawAddedWaterPercent >= -0.0001,
       addedWaterPercent,
       percSourdough,
@@ -469,14 +489,14 @@
       <tr class="total-row"><td>Skupaj (${data.numPizzas} pic)</td><td class="num"></td><td class="num">${data.targetTotalWeight.toFixed(0)} g</td></tr>
     `;
 
-    const hydrationSummary = document.getElementById('hydration-summary');
-    if (data.hydrationPossible) {
-      hydrationSummary.textContent = `Končna hidracija: ${data.actualHydration.toFixed(1)} % · voda za dodati: ${data.addedWaterPercent.toFixed(1)} %`;
-      hydrationSummary.className = 'hydration-summary';
-    } else {
-      hydrationSummary.textContent = `Izbrana hidracija je prenizka za ${data.percSourdough.toFixed(1)} % droži. Voda za dodati je omejena na 0 %; dejanska hidracija je ${data.actualHydration.toFixed(1)} %.`;
-      hydrationSummary.className = 'hydration-summary error';
-    }
+    document.getElementById('water-hydration').textContent = formatHydration(data.actualHydration);
+    document.getElementById('combined-hydration').textContent = formatHydration(data.totalLiquidHydration);
+    const hydrationWarning = document.getElementById('hydration-summary');
+    hydrationWarning.hidden = data.hydrationPossible;
+    hydrationWarning.textContent = data.hydrationPossible ? '' :
+      'Izbrana hidracija je prenizka za ' + data.percSourdough.toFixed(1) +
+      ' % droži. Voda za dodati je omejena na 0 %; dejanska vodna hidracija je ' +
+      formatHydration(data.actualHydration) + '.';
 
     calculateFlours();
   }
@@ -550,7 +570,6 @@
       <span><strong>${data.numPizzas}</strong> pic</span>
       <span><strong>${data.pizzaWeight.toFixed(0)} g</strong> / hlebček</span>
       <span>Skupaj <strong>${data.targetTotalWeight.toFixed(0)} g</strong></span>
-      <span>Hidracija <strong>${data.actualHydration.toFixed(1)} %</strong></span>
       <span>Recept: <strong>${escapeHtml(recipeName)}</strong></span>
     `;
 
@@ -584,6 +603,8 @@
       ? `Skupna moka: ${data.flourGrams.toFixed(1)} g.`
       : `Pozor: razdelitev moke je ${flourTotal.toFixed(1)} %.`;
     document.getElementById('print-note').textContent = `${flourNote} Droži so računane kot 100 % hidratirane (50 % moka / 50 % voda).`;
+    document.getElementById('print-water-hydration').textContent = formatHydration(data.actualHydration);
+    document.getElementById('print-combined-hydration').textContent = formatHydration(data.totalLiquidHydration);
   }
 
   function saveAsPdf() {
