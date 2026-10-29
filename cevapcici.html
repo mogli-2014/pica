@@ -263,6 +263,7 @@
   <section class="print-summary" aria-hidden="true">
     <h1>Čevapčiči</h1>
     <div class="print-meta">
+      <span>Datum: <strong id="print-date"></strong></span>
       <span>Meso: <strong id="print-meat"></strong></span>
       <span>Skupaj: <strong id="print-total"></strong></span>
     </div>
@@ -371,6 +372,7 @@
         return `<tr><td>${ingredient.name}</td><td>${formatNumber(percentage, 3)} %</td><td>${formatNumber(grams, 1)}</td></tr>`;
       }).join('');
       const totalGrams = meatGrams + additivesGrams;
+      document.getElementById('print-date').textContent = new Date().toLocaleDateString('sl-SI');
       document.getElementById('print-meat').textContent = formatNumber(meatGrams, 1) + ' g';
       document.getElementById('print-total').textContent = formatNumber(totalGrams, 1) + ' g';
       document.getElementById('print-ingredients').innerHTML =
