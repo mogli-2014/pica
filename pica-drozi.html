@@ -569,6 +569,7 @@
     const recipeName = recipeSelect.options[recipeSelect.selectedIndex].text;
 
     document.getElementById('print-meta').innerHTML = `
+      <span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span>
       <span><strong>${data.numPizzas}</strong> pic</span>
       <span><strong>${data.pizzaWeight.toFixed(0)} g</strong> / hlebček</span>
       <span>Skupaj <strong>${data.targetTotalWeight.toFixed(0)} g</strong></span>
