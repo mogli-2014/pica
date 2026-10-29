@@ -216,7 +216,7 @@
     const flour=total/(items.reduce((sum, item)=>sum+item[1],0)/100);
     const recipe=document.getElementById('recipe');
     const recipeName=recipe.options[recipe.selectedIndex].text;
-    document.getElementById('print-meta').innerHTML=`<span><strong>${pizzas}</strong> pic</span><span><strong>${weight.toFixed(0)} g</strong> / hlebček</span><span>Skupaj <strong>${total.toFixed(0)} g</strong></span><span>Recept: <strong>${recipeName}</strong></span>`;
+    document.getElementById('print-meta').innerHTML=`<span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span><span><strong>${pizzas}</strong> pic</span><span><strong>${weight.toFixed(0)} g</strong> / hlebček</span><span>Skupaj <strong>${total.toFixed(0)} g</strong></span><span>Recept: <strong>${recipeName}</strong></span>`;
     document.getElementById('print-ingredients').innerHTML=items.map(([name,percent])=>`<tr><td>${name}</td><td>${percent.toFixed(1)} %</td><td>${(flour*percent/100).toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj</td><td></td><td>${total.toFixed(0)}</td></tr>`;
     document.getElementById('print-water-hydration').textContent = formatHydration(val('perc_water'));
     document.getElementById('print-combined-hydration').textContent = formatHydration(val('perc_water') + val('perc_oil'));
