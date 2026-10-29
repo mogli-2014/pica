@@ -315,7 +315,7 @@ function calculate(){
 }
 function preparePrintSummary(){
  const d=getRecipeData(),sel=el('recipe');
- el('print-meta').innerHTML=`<span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
+ el('print-meta').innerHTML=`<span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span><span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
  el('print-ingredients').innerHTML=d.ingredients.map(([n,p,g])=>`<tr><td>${safe(n)}</td><td>${p.toFixed(1)} %</td><td>${g.toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj testo</td><td></td><td>${d.total.toFixed(1)}</td></tr>`;
  el('print-note').textContent='Droži: 100 % hidracija (50 % moka, 50 % voda). '+(d.hydrationPossible?'':'Opozorilo: želena hidracija ni dosegljiva brez zmanjšanja deleža droži.');
 }
