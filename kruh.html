@@ -281,7 +281,7 @@ function applyRecipe(){
  if(r.flourNames)r.flourNames.forEach((v,i)=>el('flour_name_'+(i+1)).value=v);
  el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;
  r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);
- if(r.addNames)r.addNames.forEach((v,i)=>el('add_name_'+(i+1)).value=v);
+ (r.addNames || ['Dodatek 1','Dodatek 2','Dodatek 3']).forEach((v,i)=>el('add_name_'+(i+1)).value=v);
 }
  calculate();
 }
