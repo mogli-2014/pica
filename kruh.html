@@ -256,6 +256,8 @@
 <div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input id="perc_yeast" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"></div>
 <div class="form-group"><label for="perc_sourdough">Droži (%):</label><input id="perc_sourdough" type="number" min="0" step="0.1" value="20" oninput="setManualRecipe();calculate()"><p class="field-hint">Droži imajo 100 % hidratacijo (polovica moka, polovica voda).</p></div>
 <div class="form-group"><label for="perc_salt">Sol (%):</label><input id="perc_salt" type="number" min="0" step="0.1" value="2" oninput="setManualRecipe();calculate()"></div>
+<div class="form-group"><label for="perc_sugar">Sladkor (%):</label><input id="perc_sugar" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"></div>
+<div class="form-group"><label for="perc_oil">Olje (%):</label><input id="perc_oil" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"></div>
 <p class="hint">Ime dodatka lahko poljubno spremeniš. Količine so določene v pekovskih %.</p>
 <div class="addition-grid"><input id="add_name_1" type="text" value="Kumina" aria-label="Ime dodatka 1" oninput="calculate()"><span class="unit">%</span><input id="add_pct_1" type="number" min="0" step="0.1" value="0.4" aria-label="Odstotek dodatka 1" oninput="setManualRecipe();calculate()"></div>
 <div class="addition-grid"><input id="add_name_2" type="text" value="Dodatek 2" aria-label="Ime dodatka 2" oninput="calculate()"><span class="unit">%</span><input id="add_pct_2" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 2" oninput="setManualRecipe();calculate()"></div>
@@ -282,17 +284,34 @@
 </section>
 <script>
 const recipes = {
-  classic:{flours:[300,200],flourNames:["Moka 1","Moka 2"],water:90,yeast:0,sourdough:20,salt:2,adds:[0.4,0,0],addNames:["Kumina","Dodatek 2","Dodatek 3"]},
-  matej:{water:64,yeast:0.6,sourdough:0,salt:2.2,adds:[0,0,0]},
-  marko:{water:60,yeast:1,sourdough:0,salt:2.2,adds:[0,0,0]},
-  'pirin-polnozrnati':{flours:[1000,0],flourNames:['Pirina polnozrnata',''],water:68.0,yeast:0.6,sourdough:0,salt:2.2,adds:[8,0,0],addNames:['Olivno olje','Dodatek 2','Dodatek 3']}
+  classic:{flours:[300,200],flourNames:["Moka 1","Moka 2"],water:90,yeast:0,sourdough:20,salt:2,sugar:0,oil:0,adds:[0.4,0,0],addNames:["Kumina","Dodatek 2","Dodatek 3"]},
+  matej:{water:64,yeast:0.6,sourdough:0,salt:2.2,sugar:0,oil:0,adds:[0,0,0]},
+  marko:{water:60,yeast:1,sourdough:0,salt:2.2,sugar:0,oil:0,adds:[0,0,0]},
+  'pirin-polnozrnati':{flours:[1000,0],flourNames:['Pirina polnozrnata',''],water:68.0,yeast:0.6,sourdough:0,salt:2.2,sugar:0,oil:8,adds:[0,0,0],addNames:['Dodatek 1','Dodatek 2','Dodatek 3']}
 };
-const ids=['flour1','flour2','flour_name_1','flour_name_2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt',
+const ids=['flour1','flour2','flour_name_1','flour_name_2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt','perc_sugar','perc_oil',
 'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3','bread-type'];
 const el=id=>document.getElementById(id);
 const amount=id=>Math.max(0,parseFloat(el(id).value)||0);
 const safe=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
-function loadSavedValues(){try{const v=JSON.parse(localStorage.getItem('breadCalculatorValuesV2'));if(v)ids.forEach(id=>{if(v[id]!==undefined)el(id).value=v[id];});}catch(e){}}
+function loadSavedValues(){try{
+ const v=JSON.parse(localStorage.getItem('breadCalculatorValuesV2'));
+ if(v){
+ ids.forEach(id=>{if(v[id]!==undefined)el(id).value=v[id];});
+ // Prenos starega dodatka »Olivno olje« v stalno polje brez dvojnega štetja.
+ if(v.perc_oil===undefined){
+   for(let i=1;i<=3;i++){
+     const label=(el('add_name_'+i).value||'').trim().toLocaleLowerCase('sl-SI');
+     if(label==='olivno olje'||label==='olje'){
+       el('perc_oil').value=el('add_pct_'+i).value;
+       el('add_pct_'+i).value=0;
+       el('add_name_'+i).value='Dodatek '+i;
+       break;
+     }
+   }
+ }
+ }
+ }catch(e){}}
 function saveValues(){try{const v={};ids.forEach(id=>v[id]=el(id).value);localStorage.setItem('breadCalculatorValuesV2',JSON.stringify(v));}catch(e){}}
 function setManualRecipe(){el('recipe').value='manual';}
 function applyRecipe(){
@@ -300,7 +319,7 @@ function applyRecipe(){
  if(r){
  if(r.flours)r.flours.forEach((v,i)=>el('flour'+(i+1)).value=v);
  if(r.flourNames)r.flourNames.forEach((v,i)=>el('flour_name_'+(i+1)).value=v);
- el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;
+ el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;el('perc_sugar').value=r.sugar||0;el('perc_oil').value=r.oil||0;
  r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);
  (r.addNames || ['Dodatek 1','Dodatek 2','Dodatek 3']).forEach((v,i)=>el('add_name_'+(i+1)).value=v);
 }
@@ -308,18 +327,19 @@ function applyRecipe(){
 }
 function getRecipeData(){
  const f1=amount('flour1'),f2=amount('flour2'),flour=f1+f2;
- const hydration=amount('perc_water'),yeast=amount('perc_yeast'),starter=amount('perc_sourdough'),salt=amount('perc_salt');
+ const hydration=amount('perc_water'),yeast=amount('perc_yeast'),starter=amount('perc_sourdough'),salt=amount('perc_salt'),sugar=amount('perc_sugar'),oil=amount('perc_oil');
  const additions=[1,2,3].map(i=>({name:el('add_name_'+i).value.trim()||'Dodatek '+i,pct:amount('add_pct_'+i)}));
  const addedWaterPct=Math.max(0,hydration*(100+starter/2)/100-starter/2);
  const actualHydration=(addedWaterPct+starter/2)/(100+starter/2)*100;
  const ingredients=[
  [(el('flour_name_1').value.trim()||'Moka 1'),flour?f1/flour*100:0,f1],[(el('flour_name_2').value.trim()||'Moka 2'),flour?f2/flour*100:0,f2],
  ['Voda za dodati',addedWaterPct,flour*addedWaterPct/100],
- ['Suhi kvas',yeast,flour*yeast/100],['Droži',starter,flour*starter/100],['Sol',salt,flour*salt/100],
+ ['Suhi kvas',yeast,flour*yeast/100],['Droži',starter,flour*starter/100],['Sol',salt,flour*salt/100],['Sladkor',sugar,flour*sugar/100],['Olje',oil,flour*oil/100],
  ...additions.map(a=>[a.name,a.pct,flour*a.pct/100])
  ];
  const total=ingredients.reduce((s,x)=>s+x[2],0);
- return {f1,f2,flour,total,hydration,actualHydration,addedWaterPct,starter,
+ const combinedHydration=actualHydration+oil/(1+starter/200);
+ return {f1,f2,flour,total,hydration,actualHydration,combinedHydration,addedWaterPct,starter,
  hydrationPossible:hydration*(100+starter/2)/100>=starter/2,ingredients};
 }
 
@@ -379,8 +399,8 @@ function calculate(){
  `<tr class="total-row"><td>Skupaj testo</td><td></td><td class="num">${d.total.toFixed(1)} g</td></tr>`;
  const h=el('hydration-summary');
  h.textContent=d.hydrationPossible
- ? `Končna hidracija: ${d.actualHydration.toFixed(1)} % · voda za dodati: ${d.addedWaterPct.toFixed(1)} %`
- : `Izbrana hidracija je prenizka za ${d.starter.toFixed(1)} % droži. Vode ni treba dodati; dejanska hidracija je ${d.actualHydration.toFixed(1)} %.`;
+ ? `Vodna hidracija: ${d.actualHydration.toFixed(1)} % · Voda + olje: ${d.combinedHydration.toFixed(1)} % · voda za dodati: ${d.addedWaterPct.toFixed(1)} %`
+ : `Izbrana hidracija je prenizka za ${d.starter.toFixed(1)} % droži. Vode ni treba dodati; dejanska vodna hidracija je ${d.actualHydration.toFixed(1)} %, voda + olje pa ${d.combinedHydration.toFixed(1)} %.`;
  h.className='hydration-summary'+(d.hydrationPossible?'':' error');
  const bake=getBakingPlan(d);
  el('bake-context').textContent=bake.context;
@@ -390,7 +410,7 @@ function calculate(){
 }
 function preparePrintSummary(){
  const d=getRecipeData(),sel=el('recipe');
- el('print-meta').innerHTML=`<span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span><span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
+ el('print-meta').innerHTML=`<span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span><span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Vodna hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Voda + olje: <strong>${d.combinedHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
  el('print-ingredients').innerHTML=d.ingredients.map(([n,p,g])=>`<tr><td>${safe(n)}</td><td>${p.toFixed(1)} %</td><td>${g.toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj testo</td><td></td><td>${d.total.toFixed(1)}</td></tr>`;
  const bake=getBakingPlan(d);
  el('print-bake-program').textContent=bake.context+' — '+bake.program;
