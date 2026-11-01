@@ -144,6 +144,15 @@
     .notes-button:focus-visible { outline: 3px solid #feb2b2; outline-offset: 3px; }
     @media (max-width: 767px) { .notes-button { width: 100%; } }
     .print-summary { display: none; }
+    .bake-card { margin-top:20px; }
+    .bake-card p { margin: 8px 0; }
+    .bake-card .bake-program { font-weight:700; }
+    .bake-card .bake-hint { color:#718096; font-size:14px; }
+    .bake-card select { width:100%; padding:8px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:16px; }
+    .print-bake { margin-top:2.5mm; font-size:9pt; }
+    .print-bake h2 { margin:0 0 1mm; font-size:10.5pt; }
+    .print-bake p { margin:0 0 1mm; }
+
 
     @media (max-width: 767px) {
       .full-width { width: 100%; }
@@ -252,11 +261,23 @@
 <div class="addition-grid"><input id="add_name_2" type="text" value="Dodatek 2" aria-label="Ime dodatka 2" oninput="calculate()"><span class="unit">%</span><input id="add_pct_2" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 2" oninput="setManualRecipe();calculate()"></div>
 <div class="addition-grid"><input id="add_name_3" type="text" value="Dodatek 3" aria-label="Ime dodatka 3" oninput="calculate()"><span class="unit">%</span><input id="add_pct_3" type="number" min="0" step="0.1" value="0" aria-label="Odstotek dodatka 3" oninput="setManualRecipe();calculate()"></div>
 </div></div>
-<div><div class="card"><h2>3. Izračunane količine</h2><table><thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead><tbody id="results"></tbody></table><p id="hydration-summary" class="hydration-summary"></p></div></div>
+<div><div class="card"><h2>3. Izračunane količine</h2><table><thead><tr><th>Sestavina</th><th class="num">%</th><th class="num">Količina</th></tr></thead><tbody id="results"></tbody></table><p id="hydration-summary" class="hydration-summary"></p></div>
+<div class="card bake-card"><h2>4. Predlog pečenja</h2>
+<div class="form-group"><label for="bread-type">Vrsta kruha:</label>
+<select id="bread-type" onchange="calculate()">
+<option value="auto">Samodejno glede na ime moke</option>
+<option value="wheat">Pšenični / pirin</option>
+<option value="mixed">Mešani pšenično-rženi</option>
+<option value="rye">Pretežno rženi</option>
+</select></div>
+<p id="bake-context"></p><p id="bake-program" class="bake-program"></p>
+<p id="bake-hint" class="bake-hint"></p>
+</div></div>
 </div></div><div class="print-actions" style="margin-top:20px;margin-bottom:0"><a class="notes-button" href="zapiski-kruh.html">📝 Zapiski</a><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div></div>
 <section id="print-summary" class="print-summary" aria-hidden="true">
 <h1>Kruh</h1><div class="print-meta" id="print-meta"></div>
 <div class="print-section"><h2>Sestavine</h2><table><thead><tr><th>Sestavina</th><th>%</th><th>g</th></tr></thead><tbody id="print-ingredients"></tbody></table></div>
+<div class="print-bake"><h2>Predlog pečenja</h2><p id="print-bake-program"></p><p id="print-bake-hint"></p></div>
 <p class="print-note" id="print-note"></p>
 </section>
 <script>
@@ -267,7 +288,7 @@ const recipes = {
   'pirin-polnozrnati':{flours:[1000,0],flourNames:['Pirina polnozrnata',''],water:68.0,yeast:0.6,sourdough:0,salt:2.2,adds:[8,0,0],addNames:['Olivno olje','Dodatek 2','Dodatek 3']}
 };
 const ids=['flour1','flour2','flour_name_1','flour_name_2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt',
-'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3'];
+'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3','bread-type'];
 const el=id=>document.getElementById(id);
 const amount=id=>Math.max(0,parseFloat(el(id).value)||0);
 const safe=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
@@ -301,6 +322,56 @@ function getRecipeData(){
  return {f1,f2,flour,total,hydration,actualHydration,addedWaterPct,starter,
  hydrationPossible:hydration*(100+starter/2)/100>=starter/2,ingredients};
 }
+
+function getBakingPlan(d){
+ const selected=el('bread-type').value;
+ const n=(el('flour_name_1').value+' '+el('flour_name_2').value).toLocaleLowerCase('sl-SI');
+ const names=[el('flour_name_1').value.toLocaleLowerCase('sl-SI'),el('flour_name_2').value.toLocaleLowerCase('sl-SI')];
+ const weights=[d.f1,d.f2];
+ let rye=0,wheat=0;
+ names.forEach((name,i)=>{
+   if(/rž|rye/.test(name))rye+=weights[i];
+   else if(/pšen|pšenic|pšeni|pirin|spelt|wheat/.test(name))wheat+=weights[i];
+ });
+ const known=rye+wheat;
+ let type=selected;
+ let inferred=true;
+ if(type==='auto'){
+   if(known===0){type='mixed';inferred=false;}
+   else if(rye/Math.max(1,known)>=0.65)type='rye';
+   else if(rye>0)type='mixed';
+   else type='wheat';
+   if(known<d.flour*0.8)inferred=false;
+ }
+ const labels={wheat:'Pšenični / pirin',mixed:'Mešani pšenično-rženi',rye:'Pretežno rženi'};
+ const mass=d.total;
+ if(mass<=0)return {context:'Najprej vnesi količino moke.',program:'',hint:''};
+ // Okvirna časovna skala po masi; izhodišče pri 1,1 kg (50–60 minut).
+ const points=[[500,35],[750,40],[1000,50],[1200,55],[1500,65],[2000,78]];
+ let total;
+ if(mass<=500)total=35;
+ else if(mass>=2000)total=78;
+ else {for(let i=1;i<points.length;i++){if(mass<=points[i][0]){
+   const [x0,y0]=points[i-1],[x1,y1]=points[i];
+   total=y0+(y1-y0)*(mass-x0)/(x1-x0);break;
+ }}}
+ // Rženi hlebci so praviloma gostejši; hidracija je manjša korekcija, ne edini kriterij.
+ total+=type==='rye'?6:type==='mixed'?3:0;
+ if(d.actualHydration<65)total+=3;
+ else if(d.actualHydration>=85)total+=3;
+ total=Math.round(total/5)*5;
+ const first=Math.min(10,Math.round(total*0.22/5)*5);
+ const second=Math.min(10,Math.round(total*0.22/5)*5);
+ const third=Math.max(10,total-first-second);
+ const lastTemp=type==='rye'?180:type==='mixed'?190:200;
+ const target=type==='rye'?'96–99':type==='mixed'?'93–97':'90–96';
+ const ambiguity=selected==='auto'&&!inferred?' Imena mok niso dovolj jasna; preveri izbrano vrsto kruha.':'';
+ const outside=mass<500||mass>2000?' Masa je zunaj območja 500–2.000 g; čas je samo približek.':'';
+ return {context:labels[type]+' · '+Math.round(mass)+' g testa · '+d.actualHydration.toFixed(1)+' % hidracije'+(selected==='auto'?' (samodejna ocena)':''),
+ program:first+' min pri 240 °C + '+second+' min pri 220 °C + '+third+' min pri '+lastTemp+' °C (skupaj '+(first+second+third)+' min)',
+ hint:'Predhodno ogreta pečica; običajen hlebec brez pokrova. Ciljna temperatura sredice približno '+target+' °C. Čas preveri s termometrom; vplivajo oblika, model in pečica.'+ambiguity+outside};
+}
+
 function calculate(){
  const d=getRecipeData();
  el('flour-total').textContent='Skupaj osnovna moka: '+d.flour.toFixed(1)+' g';
@@ -311,12 +382,19 @@ function calculate(){
  ? `Končna hidracija: ${d.actualHydration.toFixed(1)} % · voda za dodati: ${d.addedWaterPct.toFixed(1)} %`
  : `Izbrana hidracija je prenizka za ${d.starter.toFixed(1)} % droži. Vode ni treba dodati; dejanska hidracija je ${d.actualHydration.toFixed(1)} %.`;
  h.className='hydration-summary'+(d.hydrationPossible?'':' error');
+ const bake=getBakingPlan(d);
+ el('bake-context').textContent=bake.context;
+ el('bake-program').textContent=bake.program;
+ el('bake-hint').textContent=bake.hint;
  saveValues();
 }
 function preparePrintSummary(){
  const d=getRecipeData(),sel=el('recipe');
  el('print-meta').innerHTML=`<span>Datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></span><span>Osnovna moka: <strong>${d.flour.toFixed(1)} g</strong></span><span>Skupaj testo: <strong>${d.total.toFixed(1)} g</strong></span><span>Hidracija: <strong>${d.actualHydration.toFixed(1)} %</strong></span><span>Recept: <strong>${safe(sel.options[sel.selectedIndex].text)}</strong></span>`;
  el('print-ingredients').innerHTML=d.ingredients.map(([n,p,g])=>`<tr><td>${safe(n)}</td><td>${p.toFixed(1)} %</td><td>${g.toFixed(1)}</td></tr>`).join('')+`<tr class="print-total"><td>Skupaj testo</td><td></td><td>${d.total.toFixed(1)}</td></tr>`;
+ const bake=getBakingPlan(d);
+ el('print-bake-program').textContent=bake.context+' — '+bake.program;
+ el('print-bake-hint').textContent=bake.hint;
  el('print-note').textContent='Droži: 100 % hidracija (50 % moka, 50 % voda). '+(d.hydrationPossible?'':'Opozorilo: želena hidracija ni dosegljiva brez zmanjšanja deleža droži.');
 }
 function saveAsPdf(){preparePrintSummary();window.print();}
