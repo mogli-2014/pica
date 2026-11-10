@@ -141,9 +141,8 @@
     .flour-summary.ok { color: #2f855a; }
     .flour-summary.error { color: #c53030; }
     .topping-reference { color: #718096; font-size: 14px; margin: 0 0 14px; }
-    .topping-table td:first-child { padding-left: 0; }
-    .topping-table td:last-child { font-weight: 700; }
-    .topping-buy td { background: #e8f7ed; color: #008b45; font-weight: 700; }
+    .topping-summary { margin: 16px 0 12px; font-size: 18px; font-weight: 700; line-height: 1.5; }
+    .topping-buy { margin: 0; padding: 12px; border-radius: 8px; background: #e8f7ed; color: #008b45; font-weight: 700; }
     .print-toppings { margin-top: 2mm; font-weight: 700; }
     .print-actions { gap: 10px; flex-wrap: wrap; }
     .notes-button {
@@ -359,13 +358,8 @@
         <input type="number" id="pizza_diameter" min="1" step="0.5" placeholder="Samodejna ocena" oninput="calculateToppings()">
         <p class="field-hint">Če pustiš prazno, kalkulator oceni premer iz teže hlebčka. Ocenjeni premer: <strong id="estimated-diameter">–</strong>.</p>
       </div>
-      <table class="topping-table">
-        <tbody>
-          <tr><td>Sir na pico</td><td class="num" id="cheese-per-pizza">–</td></tr>
-          <tr class="total-row"><td>Sir skupaj za <span id="topping-pizza-count">4</span> pic</td><td class="num" id="cheese-total">–</td></tr>
-          <tr class="topping-buy"><td>Priporočilo za nakup (na 100 g navzgor)</td><td class="num" id="cheese-buy">–</td></tr>
-        </tbody>
-      </table>
+      <p class="topping-summary" id="topping-summary">4 pice po 275 g (testa / pico) → 360 g sira (90 g/pico)</p>
+      <p class="topping-buy">Priporočilo za nakup (na 100 g navzgor): <strong id="cheese-buy">400 g</strong></p>
       </div>
     </div>
   </div>
@@ -464,15 +458,24 @@
     const cheesePerPizza = 90 * Math.pow(diameter / 29.5, 2);
     const cheeseTotal = count * cheesePerPizza;
     const cheeseToBuy = Math.ceil(cheeseTotal / 100) * 100;
-    return { count, estimatedDiameter, diameter, cheesePerPizza, cheeseTotal, cheeseToBuy };
+    return { count, doughWeight, estimatedDiameter, diameter, cheesePerPizza, cheeseTotal, cheeseToBuy };
+  }
+
+  function formatToppingSummary(topping) {
+    const count = topping.count;
+    const pizzaWord = count === 1 ? 'pica' : count === 2 ? 'pici' :
+      (count === 3 || count === 4 ? 'pice' : 'pic');
+    const weight = Number.isInteger(topping.doughWeight)
+      ? topping.doughWeight.toFixed(0) : formatDecimal(topping.doughWeight);
+    return count + ' ' + pizzaWord + ' po ' + weight + ' g (testa / pico) → ' +
+      Math.round(topping.cheeseTotal) + ' g sira (' +
+      Math.round(topping.cheesePerPizza) + ' g/pico)';
   }
 
   function calculateToppings() {
     const topping = getToppingData();
     document.getElementById('estimated-diameter').textContent = formatDecimal(topping.estimatedDiameter) + ' cm';
-    document.getElementById('topping-pizza-count').textContent = topping.count;
-    document.getElementById('cheese-per-pizza').textContent = Math.round(topping.cheesePerPizza) + ' g';
-    document.getElementById('cheese-total').textContent = Math.round(topping.cheeseTotal) + ' g';
+    document.getElementById('topping-summary').textContent = formatToppingSummary(topping);
     document.getElementById('cheese-buy').textContent = topping.cheeseToBuy + ' g';
     saveValues();
   }
@@ -660,9 +663,7 @@
     document.getElementById('print-combined-hydration').textContent = formatHydration(data.totalLiquidHydration);
     const topping = getToppingData();
     document.getElementById('print-toppings').textContent =
-      'Sir (premer ' + formatDecimal(topping.diameter) + ' cm): ' +
-      Math.round(topping.cheesePerPizza) + ' g/pico · skupaj ' +
-      Math.round(topping.cheeseTotal) + ' g · za nakup ' + topping.cheeseToBuy + ' g';
+      formatToppingSummary(topping) + ' · Za nakup: ' + topping.cheeseToBuy + ' g';
   }
 
   function saveAsPdf() {
