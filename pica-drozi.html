@@ -129,7 +129,7 @@
     .hydration-metric span { display: block; margin-top: 4px; font-size: 13px; }
     .hydration-metric.combined { background: #e8f7ed; color: #008b45; }
     .print-hydration { margin-top: 3mm; font-weight: 700; }
-    .full-width { margin-top: 20px; width: calc((100% - 20px) / 2); }
+    .lower-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
     .flour-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 120px;
@@ -140,6 +140,11 @@
     .flour-summary { margin: 12px 0 0; font-size: 15px; font-weight: 700; }
     .flour-summary.ok { color: #2f855a; }
     .flour-summary.error { color: #c53030; }
+    .topping-reference { color: #718096; font-size: 14px; margin: 0 0 14px; }
+    .topping-table td:first-child { padding-left: 0; }
+    .topping-table td:last-child { font-weight: 700; }
+    .topping-buy td { background: #e8f7ed; color: #008b45; font-weight: 700; }
+    .print-toppings { margin-top: 2mm; font-weight: 700; }
     .print-actions { gap: 10px; flex-wrap: wrap; }
     .notes-button {
       display: inline-flex; align-items: center; justify-content: center;
@@ -153,7 +158,7 @@
     .print-summary { display: none; }
 
     @media (max-width: 767px) {
-      .full-width { width: 100%; }
+      .lower-grid { grid-template-columns: 1fr; }
       .print-actions { justify-content: stretch; }
       .print-button { width: 100%; }
     }
@@ -317,7 +322,8 @@
       </div>
     </div>
 
-    <div class="card full-width">
+    <div class="lower-grid">
+      <div class="card">
       <h2>4. Razdelitev moke</h2>
       <p class="hint">Vsaka naslednja moka lahko zavzame največ še preostali delež do 100 %.</p>
 
@@ -344,6 +350,24 @@
       </table>
       <p id="flour-summary" class="flour-summary"></p>
     </div>
+
+      <div class="card">
+      <h2>5. Okvirne količine nadeva</h2>
+      <p class="topping-reference">Osnova: 90 g sira za pico premera 29,5 cm (275 g testa). Količina se spreminja s površino pice.</p>
+      <div class="form-group">
+        <label for="pizza_diameter">Premer pice (cm) – po želji:</label>
+        <input type="number" id="pizza_diameter" min="1" step="0.5" placeholder="Samodejna ocena" oninput="calculateToppings()">
+        <p class="field-hint">Če pustiš prazno, kalkulator oceni premer iz teže hlebčka. Ocenjeni premer: <strong id="estimated-diameter">–</strong>.</p>
+      </div>
+      <table class="topping-table">
+        <tbody>
+          <tr><td>Sir na pico</td><td class="num" id="cheese-per-pizza">–</td></tr>
+          <tr class="total-row"><td>Sir skupaj za <span id="topping-pizza-count">4</span> pic</td><td class="num" id="cheese-total">–</td></tr>
+          <tr class="topping-buy"><td>Priporočilo za nakup (na 100 g navzgor)</td><td class="num" id="cheese-buy">–</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
   </div>
   <div class="print-actions" style="margin-top:20px;margin-bottom:0"><a class="notes-button" href="zapiski-pica.html?iz=pica-drozi">📝 Zapiski</a><button class="print-button" type="button" onclick="saveAsPdf()">📄 Shrani recept kot PDF</button></div>
 </div>
@@ -369,6 +393,7 @@
   </div>
   <div class="print-note" id="print-note"></div>
   <div class="print-hydration">Vodna hidracija: <strong id="print-water-hydration"></strong> · Voda + olje: <strong id="print-combined-hydration"></strong></div>
+  <div class="print-toppings" id="print-toppings"></div>
 </section>
 
 <script>
@@ -383,7 +408,7 @@
   const inputIds = [
     'pizzas', 'weight', 'recipe', 'perc_water', 'perc_yeast', 'perc_sourdough', 'perc_salt', 'perc_sugar', 'perc_oil',
     'flour_name_1', 'flour_percent_1', 'flour_name_2', 'flour_percent_2',
-    'flour_name_3', 'flour_percent_3', 'flour_name_4', 'flour_percent_4'
+    'flour_name_3', 'flour_percent_3', 'flour_name_4', 'flour_percent_4', 'pizza_diameter'
   ];
 
   let currentFlourGrams = 0;
@@ -425,6 +450,32 @@
   }
 
   function formatHydration(value) { return value.toFixed(1).replace('.', ',') + ' %'; }
+  function formatDecimal(value) { return value.toFixed(1).replace('.', ','); }
+
+  function getToppingData() {
+    // Število pic in teža hlebčka sta prevzeta neposredno iz 1. poglavja.
+    const count = Math.max(0, parseFloat(document.getElementById('pizzas').value) || 0);
+    const doughWeight = Math.max(0, parseFloat(document.getElementById('weight').value) || 0);
+    // Pri približno enaki debelini testo raste sorazmerno s površino.
+    const estimatedDiameter = 29.5 * Math.sqrt(doughWeight / 275);
+    const diameterInput = parseFloat(document.getElementById('pizza_diameter').value);
+    const diameter = Number.isFinite(diameterInput) && diameterInput > 0
+      ? diameterInput : estimatedDiameter;
+    const cheesePerPizza = 90 * Math.pow(diameter / 29.5, 2);
+    const cheeseTotal = count * cheesePerPizza;
+    const cheeseToBuy = Math.ceil(cheeseTotal / 100) * 100;
+    return { count, estimatedDiameter, diameter, cheesePerPizza, cheeseTotal, cheeseToBuy };
+  }
+
+  function calculateToppings() {
+    const topping = getToppingData();
+    document.getElementById('estimated-diameter').textContent = formatDecimal(topping.estimatedDiameter) + ' cm';
+    document.getElementById('topping-pizza-count').textContent = topping.count;
+    document.getElementById('cheese-per-pizza').textContent = Math.round(topping.cheesePerPizza) + ' g';
+    document.getElementById('cheese-total').textContent = Math.round(topping.cheeseTotal) + ' g';
+    document.getElementById('cheese-buy').textContent = topping.cheeseToBuy + ' g';
+    saveValues();
+  }
 
   function getRecipeData() {
     const numPizzas = parseFloat(document.getElementById('pizzas').value) || 0;
@@ -499,6 +550,7 @@
       formatHydration(data.actualHydration) + '.';
 
     calculateFlours();
+    calculateToppings();
   }
 
   function calculateFlours() {
@@ -606,6 +658,11 @@
     document.getElementById('print-note').textContent = `${flourNote} Droži so računane kot 100 % hidratirane (50 % moka / 50 % voda).`;
     document.getElementById('print-water-hydration').textContent = formatHydration(data.actualHydration);
     document.getElementById('print-combined-hydration').textContent = formatHydration(data.totalLiquidHydration);
+    const topping = getToppingData();
+    document.getElementById('print-toppings').textContent =
+      'Sir (premer ' + formatDecimal(topping.diameter) + ' cm): ' +
+      Math.round(topping.cheesePerPizza) + ' g/pico · skupaj ' +
+      Math.round(topping.cheeseTotal) + ' g · za nakup ' + topping.cheeseToBuy + ' g';
   }
 
   function saveAsPdf() {
