@@ -359,7 +359,7 @@
         <p class="field-hint">Če pustiš prazno, kalkulator oceni premer iz teže hlebčka. Ocenjeni premer: <strong id="estimated-diameter">–</strong>.</p>
       </div>
       <p class="topping-summary" id="topping-summary">4 pice po 275 g (testa / pico) → 360 g sira (90 g/pico)</p>
-      <p class="topping-buy">Priporočilo za nakup (na 100 g navzgor): <strong id="cheese-buy">400 g</strong></p>
+      <p class="topping-buy">Priporočilo za nakup: <strong id="cheese-buy">360 g</strong></p>
       </div>
     </div>
   </div>
@@ -457,7 +457,7 @@
       ? diameterInput : estimatedDiameter;
     const cheesePerPizza = 90 * Math.pow(diameter / 29.5, 2);
     const cheeseTotal = count * cheesePerPizza;
-    const cheeseToBuy = Math.ceil(cheeseTotal / 100) * 100;
+    const cheeseToBuy = Math.round(cheeseTotal);
     return { count, doughWeight, estimatedDiameter, diameter, cheesePerPizza, cheeseTotal, cheeseToBuy };
   }
 
