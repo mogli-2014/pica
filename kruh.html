@@ -250,8 +250,9 @@
 <p class="hint">Skupna osnovna moka predstavlja 100 %.</p>
 <div class="addition-grid"><input type="text" id="flour_name_1" value="Moka 1" aria-label="Ime moke 1" oninput="calculate()"><span class="unit">g</span><input type="number" id="flour1" min="0" step="1" value="300" aria-label="Moka 1 v gramih" oninput="calculate()"></div>
 <div class="addition-grid"><input type="text" id="flour_name_2" value="Moka 2" aria-label="Ime moke 2" oninput="calculate()"><span class="unit">g</span><input type="number" id="flour2" min="0" step="1" value="200" aria-label="Moka 2 v gramih" oninput="calculate()"></div>
+<div class="addition-grid"><input type="text" id="flour_name_3" value="Moka 3" aria-label="Ime moke 3" oninput="calculate()"><span class="unit">g</span><input type="number" id="flour3" min="0" step="1" value="0" aria-label="Moka 3 v gramih" oninput="calculate()"></div>
 <p id="flour-total" class="flour-summary"></p>
-<p class="field-hint">Pekovski odstotki se računajo glede na vsoto moke 1 in moke 2; moka iz droži je dodatno upoštevana pri hidraciji.</p>
+<p class="field-hint">Pekovski odstotki se računajo glede na vsoto vseh treh mok; moka iz droži je dodatno upoštevana pri hidraciji.</p>
 <div class="form-group"><label for="perc_water">Hidracija (%):</label><input id="perc_water" type="number" min="0" step="0.5" value="90" oninput="setManualRecipe();calculate()"><p class="field-hint">Končna hidracija vključuje vodo in moko v drožeh.</p></div>
 <div class="form-group"><label for="perc_yeast">Suhi kvas (%):</label><input id="perc_yeast" type="number" min="0" step="0.1" value="0" oninput="setManualRecipe();calculate()"></div>
 <div class="form-group"><label for="perc_sourdough">Droži (%):</label><input id="perc_sourdough" type="number" min="0" step="0.1" value="20" oninput="setManualRecipe();calculate()"><p class="field-hint">Droži imajo 100 % hidratacijo (polovica moka, polovica voda).</p></div>
@@ -284,12 +285,12 @@
 </section>
 <script>
 const recipes = {
-  classic:{flours:[300,200],flourNames:["Moka 1","Moka 2"],water:90,yeast:0,sourdough:20,salt:2,sugar:0,oil:0,adds:[0.4,0,0],addNames:["Kumina","Dodatek 2","Dodatek 3"]},
+  classic:{flours:[300,200,0],flourNames:["Moka 1","Moka 2","Moka 3"],water:90,yeast:0,sourdough:20,salt:2,sugar:0,oil:0,adds:[0.4,0,0],addNames:["Kumina","Dodatek 2","Dodatek 3"]},
   matej:{water:64,yeast:0.6,sourdough:0,salt:2.2,sugar:0,oil:0,adds:[0,0,0]},
   marko:{water:60,yeast:1,sourdough:0,salt:2.2,sugar:0,oil:0,adds:[0,0,0]},
-  'pirin-polnozrnati':{flours:[1000,0],flourNames:['Pirina polnozrnata',''],water:68.0,yeast:0.6,sourdough:0,salt:2.2,sugar:0,oil:8,adds:[0,0,0],addNames:['Dodatek 1','Dodatek 2','Dodatek 3']}
+  'pirin-polnozrnati':{flours:[1000,0,0],flourNames:['Pirina polnozrnata','','Moka 3'],water:68.0,yeast:0.6,sourdough:0,salt:2.2,sugar:0,oil:8,adds:[0,0,0],addNames:['Dodatek 1','Dodatek 2','Dodatek 3']}
 };
-const ids=['flour1','flour2','flour_name_1','flour_name_2','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt','perc_sugar','perc_oil',
+const ids=['flour1','flour2','flour3','flour_name_1','flour_name_2','flour_name_3','recipe','perc_water','perc_yeast','perc_sourdough','perc_salt','perc_sugar','perc_oil',
 'add_name_1','add_pct_1','add_name_2','add_pct_2','add_name_3','add_pct_3','bread-type'];
 const el=id=>document.getElementById(id);
 const amount=id=>Math.max(0,parseFloat(el(id).value)||0);
@@ -317,8 +318,8 @@ function setManualRecipe(){el('recipe').value='manual';}
 function applyRecipe(){
  const r=recipes[el('recipe').value];
  if(r){
- if(r.flours)r.flours.forEach((v,i)=>el('flour'+(i+1)).value=v);
- if(r.flourNames)r.flourNames.forEach((v,i)=>el('flour_name_'+(i+1)).value=v);
+ if(r.flours)[1,2,3].forEach(i=>el('flour'+i).value=r.flours[i-1]??0);
+ if(r.flourNames)[1,2,3].forEach(i=>el('flour_name_'+i).value=r.flourNames[i-1]??('Moka '+i));
  el('perc_water').value=r.water;el('perc_yeast').value=r.yeast;el('perc_sourdough').value=r.sourdough;el('perc_salt').value=r.salt;el('perc_sugar').value=r.sugar||0;el('perc_oil').value=r.oil||0;
  r.adds.forEach((x,i)=>el('add_pct_'+(i+1)).value=x);
  (r.addNames || ['Dodatek 1','Dodatek 2','Dodatek 3']).forEach((v,i)=>el('add_name_'+(i+1)).value=v);
@@ -326,28 +327,27 @@ function applyRecipe(){
  calculate();
 }
 function getRecipeData(){
- const f1=amount('flour1'),f2=amount('flour2'),flour=f1+f2;
+ const f1=amount('flour1'),f2=amount('flour2'),f3=amount('flour3'),flour=f1+f2+f3;
  const hydration=amount('perc_water'),yeast=amount('perc_yeast'),starter=amount('perc_sourdough'),salt=amount('perc_salt'),sugar=amount('perc_sugar'),oil=amount('perc_oil');
  const additions=[1,2,3].map(i=>({name:el('add_name_'+i).value.trim()||'Dodatek '+i,pct:amount('add_pct_'+i)}));
  const addedWaterPct=Math.max(0,hydration*(100+starter/2)/100-starter/2);
  const actualHydration=(addedWaterPct+starter/2)/(100+starter/2)*100;
  const ingredients=[
- [(el('flour_name_1').value.trim()||'Moka 1'),flour?f1/flour*100:0,f1],[(el('flour_name_2').value.trim()||'Moka 2'),flour?f2/flour*100:0,f2],
+ [(el('flour_name_1').value.trim()||'Moka 1'),flour?f1/flour*100:0,f1],[(el('flour_name_2').value.trim()||'Moka 2'),flour?f2/flour*100:0,f2],[(el('flour_name_3').value.trim()||'Moka 3'),flour?f3/flour*100:0,f3],
  ['Voda za dodati',addedWaterPct,flour*addedWaterPct/100],
  ['Suhi kvas',yeast,flour*yeast/100],['Droži',starter,flour*starter/100],['Sol',salt,flour*salt/100],['Sladkor',sugar,flour*sugar/100],['Olje',oil,flour*oil/100],
  ...additions.map(a=>[a.name,a.pct,flour*a.pct/100])
  ];
  const total=ingredients.reduce((s,x)=>s+x[2],0);
  const combinedHydration=actualHydration+oil/(1+starter/200);
- return {f1,f2,flour,total,hydration,actualHydration,combinedHydration,addedWaterPct,starter,
+ return {f1,f2,f3,flour,total,hydration,actualHydration,combinedHydration,addedWaterPct,starter,
  hydrationPossible:hydration*(100+starter/2)/100>=starter/2,ingredients};
 }
 
 function getBakingPlan(d){
  const selected=el('bread-type').value;
- const n=(el('flour_name_1').value+' '+el('flour_name_2').value).toLocaleLowerCase('sl-SI');
- const names=[el('flour_name_1').value.toLocaleLowerCase('sl-SI'),el('flour_name_2').value.toLocaleLowerCase('sl-SI')];
- const weights=[d.f1,d.f2];
+ const names=[1,2,3].map(i=>el('flour_name_'+i).value.toLocaleLowerCase('sl-SI'));
+ const weights=[d.f1,d.f2,d.f3];
  let rye=0,wheat=0;
  names.forEach((name,i)=>{
    if(/rž|rye/.test(name))rye+=weights[i];
